@@ -2,7 +2,7 @@
 
 **CI smoke tests for LLM endpoints and agents.**
 
-Before you merge: does your gateway still respond? Is the JSON still valid? Does your schema still match
+Before you merge: does your gateway still respond? Is the JSON still valid? Does your schema still match?
 
 ```bash
 connor run suite.yaml   # exit 0 = safe to merge · exit 1 = block the PR
