@@ -6,13 +6,17 @@ import (
 )
 
 func sampleArtifact(suiteID string, p95 int64, model string) RunArtifact {
+	return sampleArtifactWithPassRate(suiteID, p95, model, 100)
+}
+
+func sampleArtifactWithPassRate(suiteID string, p95 int64, model string, passRate float64) RunArtifact {
 	return RunArtifact{
 		Version: RunArtifactVersion,
 		SuiteID: suiteID,
 		Cases: []RunCase{
-			{ID: "c1", Model: model, Passed: true, LatencyMs: p95},
+			{ID: "c1", Model: model, Passed: passRate >= 100, LatencyMs: p95},
 		},
-		Summary: RunSummary{Total: 1, Passed: 1, P95Ms: p95, P50Ms: p95, PassRate: 100},
+		Summary: RunSummary{Total: 1, Passed: 1, P95Ms: p95, P50Ms: p95, PassRate: passRate},
 	}
 }
 
@@ -53,7 +57,7 @@ func TestCompareRuns_p95Pass(t *testing.T) {
 	b := sampleArtifact("s", 100, "m")
 	c := sampleArtifact("s", 108, "m")
 	max := 20.0
-	result, err := CompareRuns(b, c, &max)
+	result, err := CompareRuns(b, c, &max, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -66,7 +70,7 @@ func TestCompareRuns_p95Fail(t *testing.T) {
 	b := sampleArtifact("s", 100, "m")
 	c := sampleArtifact("s", 150, "m")
 	max := 20.0
-	result, err := CompareRuns(b, c, &max)
+	result, err := CompareRuns(b, c, &max, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -113,12 +117,74 @@ func TestFindP95Driver_multiCase(t *testing.T) {
 func TestCompareRuns_skipGateWhenNil(t *testing.T) {
 	b := sampleArtifact("s", 100, "m")
 	c := sampleArtifact("s", 500, "m")
-	result, err := CompareRuns(b, c, nil)
+	result, err := CompareRuns(b, c, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !result.Passed || result.P95.Checked {
+	if !result.Passed || result.P95.Checked || result.PassRate.Checked {
 		t.Fatalf("result: %+v", result)
+	}
+}
+
+func TestCompareRuns_passRatePass(t *testing.T) {
+	b := sampleArtifactWithPassRate("s", 100, "m", 100)
+	c := sampleArtifactWithPassRate("s", 100, "m", 97)
+	min := 95.0
+	result, err := CompareRuns(b, c, nil, &min)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !result.Passed || !result.PassRate.Passed || !result.PassRate.Checked {
+		t.Fatalf("result: %+v", result)
+	}
+	if result.PassRate.CandidatePassRate != 97 {
+		t.Fatalf("pass rate: %+v", result.PassRate)
+	}
+}
+
+func TestCompareRuns_passRateFail(t *testing.T) {
+	b := sampleArtifactWithPassRate("s", 100, "m", 100)
+	c := sampleArtifactWithPassRate("s", 100, "m", 89)
+	min := 95.0
+	result, err := CompareRuns(b, c, nil, &min)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Passed || result.PassRate.Passed {
+		t.Fatalf("result: %+v", result)
+	}
+	if result.PassRate.Threshold != 95 || result.PassRate.CandidatePassRate != 89 {
+		t.Fatalf("pass rate: %+v", result.PassRate)
+	}
+}
+
+func TestCompareRuns_passRateBoundary(t *testing.T) {
+	b := sampleArtifactWithPassRate("s", 100, "m", 100)
+	c := sampleArtifactWithPassRate("s", 100, "m", 95)
+	min := 95.0
+	result, err := CompareRuns(b, c, nil, &min)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !result.Passed || !result.PassRate.Passed {
+		t.Fatalf("exact 95.0 must PASS: %+v", result)
+	}
+}
+
+func TestCompareRuns_p95OkPassRateFail(t *testing.T) {
+	b := sampleArtifactWithPassRate("s", 100, "m", 100)
+	c := sampleArtifactWithPassRate("s", 108, "m", 89)
+	max := 20.0
+	min := 95.0
+	result, err := CompareRuns(b, c, &max, &min)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !result.P95.Passed {
+		t.Fatalf("p95 should pass: %+v", result.P95)
+	}
+	if result.Passed || result.PassRate.Passed {
+		t.Fatalf("AND fail expected: %+v", result)
 	}
 }
 

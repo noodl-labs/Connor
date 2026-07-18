@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- `connor compare ... --min-pass-rate N` — fail if candidate `pass_rate` is below threshold (RFC 0001 §5.3)
+- [CI regression handbook](docs/handbook/ci-regression.md) — baseline → candidate → compare in CI
+
+---
+
 ## v0.1.0-beta.3
 
 **Theme:** Regression compare (p95).
@@ -8,9 +16,6 @@
 - `connor run suite.yaml --out run.json` — export run artifact (RFC 0001)
 - `connor compare baseline.json candidate.json --max-p95-regression N` — p95 regression gate
 - Compare FAIL output shows p95 driver case (id, model, latency delta)
-
-### Note
-- `--min-pass-rate` on compare is planned for v0.1.0 (not in this release)
 
 ---
 

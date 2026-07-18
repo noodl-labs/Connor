@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "suite_id": "serving-smoke",
+  "target": "https://openrouter.ai/api/v1",
+  "cases": [
+    {
+      "id": "ping-gemini",
+      "model": "google/gemini-2.5-flash-lite",
+      "passed": true,
+      "reason": "",
+      "latency_ms": 446,
+      "attempts": 1
+    },
+    {
+      "id": "ping-llama",
+      "model": "meta-llama/llama-3.1-8b-instruct",
+      "passed": true,
+      "reason": "",
+      "latency_ms": 773,
+      "attempts": 1
+    },
+    {
+      "id": "json-ok",
+      "model": "openai/gpt-4o-mini",
+      "passed": true,
+      "reason": "",
+      "latency_ms": 833,
+      "attempts": 1
+    }
+  ],
+  "summary": {
+    "total": 3,
+    "passed": 3,
+    "failed": 0,
+    "pass_rate": 100,
+    "p50_ms": 773,
+    "p95_ms": 833
+  }
+}

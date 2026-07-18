@@ -125,23 +125,27 @@ connor run \
 
 ### 5. Regression compare (optional)
 
-Save two runs of the **same suite**, then compare latency:
+Save two runs of the **same suite**, then compare latency and pass rate:
 
 ```bash
 mkdir -p runs
 connor run benchmarks/examples/agent-json-smoke.yaml --out runs/baseline.json
 connor run benchmarks/examples/agent-json-smoke.yaml --out runs/candidate.json
 
-connor compare runs/baseline.json runs/candidate.json --max-p95-regression 20
-# PASS or FAIL  p95 +N%  (threshold: 20%)
-# On FAIL: driver case id, model, and latency delta are shown
+connor compare runs/baseline.json runs/candidate.json \
+  --max-p95-regression 20 \
+  --min-pass-rate 95
+# PASS or FAIL  p95 +N%
+# PASS or FAIL  pass rate N%
 ```
 - exit 0: compare passed
-- exit 1: latency regression failed
+- exit 1: a gate failed (p95 and/or pass rate)
 - exit 2: invalid or incomparable run files
 
-On failure, Connor shows the driver case, model, and latency delta.
-Baseline = your last known-good run (e.g. artifact from `main`). Candidate = current PR run.
+On p95 failure, Connor shows the driver case, model, and latency delta.
+Baseline = your last known-good run (e.g. from `main`). Candidate = current PR run.
+
+Full CI guide: [docs/handbook/ci-regression.md](docs/handbook/ci-regression.md).
 
 ---
 
@@ -171,7 +175,7 @@ jobs:
         run: connor run benchmarks/examples/agent-json-smoke.yaml
 ```
 
-Regression gate (optional second job): store `baseline.json` as a CI artifact from `main`, then `connor compare` on PRs.
+For baseline → candidate → `--max-p95-regression` / `--min-pass-rate`, see the [CI regression handbook](docs/handbook/ci-regression.md).
 
 ---
 
@@ -264,7 +268,9 @@ Details: [docs/architecture.md](docs/architecture.md) · [Roadmap](ROADMAP.md) �
 - `connor run --out run.json` — run artifact
 - `connor compare --max-p95-regression` — p95 regression + driver case on FAIL
 
-**Next (`v0.1.0`):** `--min-pass-rate` on compare · CI handbook
+**Next (`v0.1.0`):** tag release
+
+Guide: [CI regression handbook](docs/handbook/ci-regression.md).
 
 ---
 

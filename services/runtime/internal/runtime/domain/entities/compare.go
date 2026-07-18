@@ -32,10 +32,19 @@ type P95CompareResult struct {
 	Driver       P95Driver
 }
 
+// PassRateCompareResult is the outcome of the pass-rate gate (RFC 0001 §5.3).
+type PassRateCompareResult struct {
+	Checked           bool
+	Passed            bool
+	Threshold         float64
+	CandidatePassRate float64
+}
+
 // CompareResult aggregates compare gates. Passed is true when all enabled gates pass.
 type CompareResult struct {
-	Passed bool
-	P95    P95CompareResult
+	Passed   bool
+	P95      P95CompareResult
+	PassRate PassRateCompareResult
 }
 
 // ParseRunArtifactJSON decodes run.json and validates schema version.
@@ -125,8 +134,13 @@ func FindP95Driver(baseline, candidate RunArtifact) P95Driver {
 	}
 }
 
-// CompareRuns compares two artifacts. maxP95Regression nil skips the p95 gate.
-func CompareRuns(baseline, candidate RunArtifact, maxP95Regression *float64) (CompareResult, error) {
+// CompareRuns compares two artifacts.
+// maxP95Regression nil skips the p95 gate; minPassRate nil skips the pass-rate gate.
+func CompareRuns(
+	baseline, candidate RunArtifact,
+	maxP95Regression *float64,
+	minPassRate *float64,
+) (CompareResult, error) {
 	if err := ValidateComparable(baseline, candidate); err != nil {
 		return CompareResult{}, err
 	}
@@ -139,6 +153,9 @@ func CompareRuns(baseline, candidate RunArtifact, maxP95Regression *float64) (Co
 			BaselineP95:  baseline.Summary.P95Ms,
 			CandidateP95: candidate.Summary.P95Ms,
 		},
+		PassRate: PassRateCompareResult{
+			CandidatePassRate: candidate.Summary.PassRate,
+		},
 	}
 
 	if maxP95Regression != nil {
@@ -148,6 +165,15 @@ func CompareRuns(baseline, candidate RunArtifact, maxP95Regression *float64) (Co
 		if !result.P95.Passed {
 			result.Passed = false
 			result.P95.Driver = FindP95Driver(baseline, candidate)
+		}
+	}
+
+	if minPassRate != nil {
+		result.PassRate.Checked = true
+		result.PassRate.Threshold = *minPassRate
+		result.PassRate.Passed = candidate.Summary.PassRate >= *minPassRate
+		if !result.PassRate.Passed {
+			result.Passed = false
 		}
 	}
 

@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "suite_id": "glm-qwen-smoke",
+  "target": "https://openrouter.ai/api/v1",
+  "cases": [
+    {
+      "id": "intent-glm",
+      "model": "z-ai/glm-5.2",
+      "passed": true,
+      "reason": "",
+      "latency_ms": 1150,
+      "attempts": 1
+    },
+    {
+      "id": "intent-qwen",
+      "model": "qwen/qwen3.7-plus",
+      "passed": true,
+      "reason": "",
+      "latency_ms": 7483,
+      "attempts": 1
+    }
+  ],
+  "summary": {
+    "total": 2,
+    "passed": 2,
+    "failed": 0,
+    "pass_rate": 100,
+    "p50_ms": 1150,
+    "p95_ms": 7483
+  }
+}

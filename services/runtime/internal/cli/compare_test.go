@@ -42,6 +42,43 @@ func TestPrintCompareResult_fail(t *testing.T) {
 	}
 }
 
+func TestPrintCompareResult_passRateFail(t *testing.T) {
+	var buf bytes.Buffer
+	printCompareResult(&buf, entities.CompareResult{
+		Passed: false,
+		P95: entities.P95CompareResult{
+			Checked: true, Passed: true, DeltaPercent: 8, Threshold: 20,
+		},
+		PassRate: entities.PassRateCompareResult{
+			Checked: true, Passed: false, CandidatePassRate: 89, Threshold: 95,
+		},
+	})
+	out := buf.String()
+	if !strings.Contains(out, "PASS  p95 +8%") {
+		t.Fatalf("got %q", out)
+	}
+	if !strings.Contains(out, "FAIL  pass rate 89%  (threshold: 95%)") {
+		t.Fatalf("got %q", out)
+	}
+}
+
+func TestPrintCompareResult_passRatePass(t *testing.T) {
+	var buf bytes.Buffer
+	printCompareResult(&buf, entities.CompareResult{
+		Passed: true,
+		P95: entities.P95CompareResult{
+			Checked: true, Passed: true, DeltaPercent: 8, Threshold: 20,
+		},
+		PassRate: entities.PassRateCompareResult{
+			Checked: true, Passed: true, CandidatePassRate: 97, Threshold: 95,
+		},
+	})
+	out := buf.String()
+	if !strings.Contains(out, "PASS  pass rate 97%") {
+		t.Fatalf("got %q", out)
+	}
+}
+
 func TestLoadRunArtifact_roundTrip(t *testing.T) {
 	dir := t.TempDir()
 	path := dir + "/run.json"
