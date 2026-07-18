@@ -175,8 +175,8 @@ FAIL  pass rate 89%  (threshold: 95%)
 
 ## 8. Done when (v0.1 exit criteria)
 
-- [ ] `connor run suite.yaml --out run.json` works
-- [ ] `connor compare` fails on p95 regression in a demo
-- [ ] `connor compare` respects `--min-pass-rate`
+- [x] `connor run suite.yaml --out run.json` works
+- [x] `connor compare` fails on p95 regression in a demo
+- [x] `connor compare` respects `--min-pass-rate`
 - [ ] Documented in handbook
 - [ ] Tag `v0.1.0` published

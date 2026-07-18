@@ -50,7 +50,7 @@ Dates are indicative — ship when **exit criteria** below are met.
 | 12 | JSON Schema | Required fields present? | ✅ beta.2 | `expect_json_schema` |
 | | **Regression & budget** | | | |
 | 13 | Latency regression | p95 vs baseline? | ✅ beta.3 | `connor compare` |
-| 14 | Pass rate | Success rate ≥ threshold? | 🔜 v0.1 | `min_pass_rate` |
+| 14 | Pass rate | Success rate ≥ threshold? | ✅ v0.1 | `--min-pass-rate` |
 | 15 | Token cost | API budget exceeded? | 📋 v0.2 | `max_cost_regression` |
 | | **Agent & tools** | | | |
 | 16 | Tool call present | Agent called `search`? | 📋 v0.2 | `expect_tool` |
@@ -112,7 +112,7 @@ Dates are indicative — ship when **exit criteria** below are met.
 
 ### Quality Gates
 - [x] `max_p95_regression` threshold
-- [ ] `min_pass_rate` threshold
+- [x] `min_pass_rate` threshold
 - [x] `connor compare` exits 1 on gate failure
 
 ### Developer Experience
@@ -123,7 +123,7 @@ Dates are indicative — ship when **exit criteria** below are met.
 ### Exit criteria for v0.1.0
 - [x] `connor run suite.yaml --out run.json` works
 - [x] `connor compare` blocks on latency regression in demo
-- [ ] `connor compare` respects `--min-pass-rate`
+- [x] `connor compare` respects `--min-pass-rate`
 - [ ] Documented in handbook
 - [ ] Tag `v0.1.0` published
 

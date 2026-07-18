@@ -11,6 +11,7 @@ import (
 
 func newCompareCmd() *cobra.Command {
 	var maxP95Regression float64
+	var minPassRate float64
 
 	cmd := &cobra.Command{
 		Use:   "compare baseline.json candidate.json",
@@ -30,8 +31,12 @@ func newCompareCmd() *cobra.Command {
 			if cmd.Flags().Changed("max-p95-regression") {
 				maxP95 = &maxP95Regression
 			}
+			var minPR *float64
+			if cmd.Flags().Changed("min-pass-rate") {
+				minPR = &minPassRate
+			}
 
-			result, err := entities.CompareRuns(baseline, candidate, maxP95)
+			result, err := entities.CompareRuns(baseline, candidate, maxP95, minPR)
 			if err != nil {
 				return exitCompareUsage(err)
 			}
@@ -48,6 +53,10 @@ func newCompareCmd() *cobra.Command {
 		&maxP95Regression, "max-p95-regression", 0,
 		"Fail if p95 latency regression exceeds this percent (e.g. 20)",
 	)
+	cmd.Flags().Float64Var(
+		&minPassRate, "min-pass-rate", 0,
+		"Fail if candidate pass rate is below this percent (e.g. 95)",
+	)
 
 	return cmd
 }
@@ -61,25 +70,42 @@ func loadRunArtifact(path string) (entities.RunArtifact, error) {
 }
 
 func printCompareResult(w interface{ Write([]byte) (int, error) }, result entities.CompareResult) {
-	if !result.P95.Checked {
-		_, _ = fmt.Fprintf(w, "PASS  p95 %s (no threshold set)\n", formatDelta(result.P95.DeltaPercent))
+	printP95Line(w, result.P95)
+	printPassRateLine(w, result.PassRate)
+}
+
+func printP95Line(w interface{ Write([]byte) (int, error) }, p95 entities.P95CompareResult) {
+	if !p95.Checked {
+		_, _ = fmt.Fprintf(w, "PASS  p95 %s (no threshold set)\n", formatDelta(p95.DeltaPercent))
 		return
 	}
-	if result.P95.Passed {
-		_, _ = fmt.Fprintf(w, "PASS  p95 %s\n", formatDelta(result.P95.DeltaPercent))
+	if p95.Passed {
+		_, _ = fmt.Fprintf(w, "PASS  p95 %s\n", formatDelta(p95.DeltaPercent))
 		return
 	}
 	_, _ = fmt.Fprintf(w, "FAIL  p95 %s  (threshold: %.0f%%)\n",
-		formatDelta(result.P95.DeltaPercent), result.P95.Threshold)
-	if result.P95.Driver.Found {
+		formatDelta(p95.DeltaPercent), p95.Threshold)
+	if p95.Driver.Found {
 		_, _ = fmt.Fprintf(w, "      driver  %s  %s  %dms → %dms  (%s)\n",
-			result.P95.Driver.CaseID,
-			result.P95.Driver.Model,
-			result.P95.Driver.BaselineMs,
-			result.P95.Driver.CandidateMs,
-			formatDelta(result.P95.Driver.DeltaPercent),
+			p95.Driver.CaseID,
+			p95.Driver.Model,
+			p95.Driver.BaselineMs,
+			p95.Driver.CandidateMs,
+			formatDelta(p95.Driver.DeltaPercent),
 		)
 	}
+}
+
+func printPassRateLine(w interface{ Write([]byte) (int, error) }, pr entities.PassRateCompareResult) {
+	if !pr.Checked {
+		return
+	}
+	if pr.Passed {
+		_, _ = fmt.Fprintf(w, "PASS  pass rate %.0f%%\n", pr.CandidatePassRate)
+		return
+	}
+	_, _ = fmt.Fprintf(w, "FAIL  pass rate %.0f%%  (threshold: %.0f%%)\n",
+		pr.CandidatePassRate, pr.Threshold)
 }
 
 func formatDelta(pct float64) string {

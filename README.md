@@ -264,7 +264,13 @@ Details: [docs/architecture.md](docs/architecture.md) · [Roadmap](ROADMAP.md) �
 - `connor run --out run.json` — run artifact
 - `connor compare --max-p95-regression` — p95 regression + driver case on FAIL
 
-**Next (`v0.1.0`):** `--min-pass-rate` on compare · CI handbook
+**Next (`v0.1.0`):** CI handbook · tag release
+
+```bash
+connor compare baseline.json candidate.json \
+  --max-p95-regression 20 \
+  --min-pass-rate 95
+```
 
 ---
 
