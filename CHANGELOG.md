@@ -4,6 +4,7 @@
 
 ### Added
 - `connor compare ... --min-pass-rate N` — fail if candidate `pass_rate` is below threshold (RFC 0001 §5.3)
+- [CI regression handbook](docs/handbook/ci-regression.md) — baseline → candidate → compare in CI
 
 ---
 

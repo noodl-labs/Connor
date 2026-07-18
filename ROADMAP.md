@@ -117,14 +117,14 @@ Dates are indicative — ship when **exit criteria** below are met.
 
 ### Developer Experience
 - [x] README + architecture + `.env.example`
-- [ ] `docs/ci-github-actions.md`
+- [x] `docs/ci-github-actions.md` → [docs/handbook/ci-regression.md](docs/handbook/ci-regression.md)
 - [ ] LICENSE
 
 ### Exit criteria for v0.1.0
 - [x] `connor run suite.yaml --out run.json` works
 - [x] `connor compare` blocks on latency regression in demo
 - [x] `connor compare` respects `--min-pass-rate`
-- [ ] Documented in handbook
+- [x] Documented in handbook
 - [ ] Tag `v0.1.0` published
 
 ---
