@@ -235,13 +235,20 @@ Omit a flag until you trust the metric — omitted = not enforced.
 
 ## Offline dry-run (no API)
 
-Useful to validate CLI wiring:
+Comparable fixtures ship in the repo — no LLM calls:
 
 ```bash
-# Create two comparable fixtures, then:
-connor compare baseline.json candidate.json --min-pass-rate 95
+connor compare \
+  benchmarks/examples/regression-demo/baseline.json \
+  benchmarks/examples/regression-demo/candidate.json \
+  --max-p95-regression 20 \
+  --min-pass-rate 95
 echo $?
 ```
+
+Expected: both gates **FAIL** (p95 ~+150%, pass rate 75%), exit `1`.
+
+Details: [benchmarks/examples/regression-demo/README.md](../../benchmarks/examples/regression-demo/README.md).
 
 ---
 

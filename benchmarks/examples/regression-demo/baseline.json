@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "suite_id": "regression-demo",
+  "target": "https://example/v1",
+  "cases": [
+    {
+      "id": "a",
+      "model": "m",
+      "passed": true,
+      "reason": "",
+      "latency_ms": 100,
+      "attempts": 1
+    },
+    {
+      "id": "b",
+      "model": "m",
+      "passed": true,
+      "reason": "",
+      "latency_ms": 120,
+      "attempts": 1
+    },
+    {
+      "id": "c",
+      "model": "m",
+      "passed": true,
+      "reason": "",
+      "latency_ms": 140,
+      "attempts": 1
+    },
+    {
+      "id": "d",
+      "model": "m",
+      "passed": true,
+      "reason": "",
+      "latency_ms": 160,
+      "attempts": 1
+    }
+  ],
+  "summary": {
+    "total": 4,
+    "passed": 4,
+    "failed": 0,
+    "pass_rate": 100,
+    "p50_ms": 120,
+    "p95_ms": 160
+  }
+}

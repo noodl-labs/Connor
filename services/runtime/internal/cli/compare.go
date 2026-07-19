@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/noodl-labs/ConnorLLM/services/runtime/internal/cli/output"
 	"github.com/noodl-labs/ConnorLLM/services/runtime/internal/runtime/domain/entities"
 )
 
@@ -41,7 +42,13 @@ func newCompareCmd() *cobra.Command {
 				return exitCompareUsage(err)
 			}
 
-			printCompareResult(os.Stdout, result)
+			output.PrintCompare(os.Stdout, output.CompareView{
+				Version:   Version,
+				SuiteID:   candidate.SuiteID,
+				Baseline:  baseline.Summary,
+				Candidate: candidate.Summary,
+				Result:    result,
+			})
 			if !result.Passed {
 				os.Exit(1)
 			}
@@ -67,52 +74,6 @@ func loadRunArtifact(path string) (entities.RunArtifact, error) {
 		return entities.RunArtifact{}, fmt.Errorf("connor: read %s: %w", path, err)
 	}
 	return entities.ParseRunArtifactJSON(data)
-}
-
-func printCompareResult(w interface{ Write([]byte) (int, error) }, result entities.CompareResult) {
-	printP95Line(w, result.P95)
-	printPassRateLine(w, result.PassRate)
-}
-
-func printP95Line(w interface{ Write([]byte) (int, error) }, p95 entities.P95CompareResult) {
-	if !p95.Checked {
-		_, _ = fmt.Fprintf(w, "PASS  p95 %s (no threshold set)\n", formatDelta(p95.DeltaPercent))
-		return
-	}
-	if p95.Passed {
-		_, _ = fmt.Fprintf(w, "PASS  p95 %s\n", formatDelta(p95.DeltaPercent))
-		return
-	}
-	_, _ = fmt.Fprintf(w, "FAIL  p95 %s  (threshold: %.0f%%)\n",
-		formatDelta(p95.DeltaPercent), p95.Threshold)
-	if p95.Driver.Found {
-		_, _ = fmt.Fprintf(w, "      driver  %s  %s  %dms → %dms  (%s)\n",
-			p95.Driver.CaseID,
-			p95.Driver.Model,
-			p95.Driver.BaselineMs,
-			p95.Driver.CandidateMs,
-			formatDelta(p95.Driver.DeltaPercent),
-		)
-	}
-}
-
-func printPassRateLine(w interface{ Write([]byte) (int, error) }, pr entities.PassRateCompareResult) {
-	if !pr.Checked {
-		return
-	}
-	if pr.Passed {
-		_, _ = fmt.Fprintf(w, "PASS  pass rate %.0f%%\n", pr.CandidatePassRate)
-		return
-	}
-	_, _ = fmt.Fprintf(w, "FAIL  pass rate %.0f%%  (threshold: %.0f%%)\n",
-		pr.CandidatePassRate, pr.Threshold)
-}
-
-func formatDelta(pct float64) string {
-	if pct >= 0 {
-		return fmt.Sprintf("+%.0f%%", pct)
-	}
-	return fmt.Sprintf("%.0f%%", pct)
 }
 
 // exitCompareUsage prints err and exits with code 2 (RFC 0001 §2).

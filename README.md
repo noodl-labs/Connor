@@ -223,6 +223,7 @@ Point `CONNOR_BASE_URL` at **staging**, not prod. Use the same prompts and schem
 | [`serving-smoke.yaml`](benchmarks/examples/serving-smoke.yaml) | Multi-model serving smoke | Post-deploy / exploration |
 | [`glm-qwen-smoke.yaml`](benchmarks/examples/glm-qwen-smoke.yaml) | 4-model schema smoke | Multi-provider demo |
 | [`agent-json.yaml`](benchmarks/examples/agent-json.yaml) | 1 pass + 2 intentional fails | Local demo only |
+| [`regression-demo/`](benchmarks/examples/regression-demo/) | Offline `compare` — p95 + pass rate FAIL | Local demo / docs |
 
 ---
 
@@ -231,7 +232,7 @@ Point `CONNOR_BASE_URL` at **staging**, not prod. Use the same prompts and schem
 | Command | `0` | `1` | `2` |
 |---------|-----|-----|-----|
 | `connor run` | All cases passed | Any case failed | — |
-| `connor compare` | All enabled gates passed | p95 regression failed | Invalid / incomparable `run.json` |
+| `connor compare` | All enabled gates passed | Gate failed (p95 and/or pass rate) | Invalid / incomparable `run.json` |
 
 **Fail reasons (stable):** `call_failed` · `invalid_json` · `schema_mismatch` · `content_mismatch`
 
