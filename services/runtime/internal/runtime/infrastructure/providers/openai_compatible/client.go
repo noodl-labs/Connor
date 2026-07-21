@@ -107,7 +107,7 @@ func (c *Client) Execute(ctx context.Context, req entities.Request) (entities.Re
 		}, nil
 	}
 
-	content, err := AssistantContent(raw)
+	parsed, err := ParseCompletion(raw)
 	if err != nil {
 		return entities.NewFailedResponse(
 			entities.FailureProvider,
@@ -118,7 +118,11 @@ func (c *Client) Execute(ctx context.Context, req entities.Request) (entities.Re
 		), nil
 	}
 
-	return entities.NewSuccessResponse(content, status, ms, 0, 1), nil
+	resp := entities.NewSuccessResponse(parsed.Content, status, ms, 0, 1)
+	resp.ToolCalls = parsed.ToolCalls
+	resp.PromptTokens = parsed.PromptTokens
+	resp.CompletionTokens = parsed.CompletionTokens
+	return resp, nil
 }
 
 func buildRequest(req entities.Request) ([]byte, error) {

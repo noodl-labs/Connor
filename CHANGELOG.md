@@ -5,6 +5,9 @@
 ### Docs
 - RFC 0002 Accepted (tool & cost gates); ADR 0002 (token delta); tracking issue #9
 
+### Unreleased (v0.2)
+- Parse `tool_calls` + token `usage` from OpenAI-compatible responses into `run.json` (RFC 0002 PR-1)
+
 ---
 
 ## v0.1.0

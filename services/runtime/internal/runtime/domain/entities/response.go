@@ -30,15 +30,24 @@ var (
 	ErrCallCancelled      = errors.New("entities: call cancelled")
 )
 
+// ToolCall is a tool invocation name from a provider response (RFC 0002).
+// Args are intentionally omitted in v0.2 — name (+ order) only.
+type ToolCall struct {
+	Name string `json:"name"`
+}
+
 // Response is what the runtime observed after executing a Request (final attempt summary).
 type Response struct {
-	Body       string
-	HTTPStatus int
-	LatencyMs  int64
-	TTFTMs     int64 // Time to first token when Request.Stream == true; 0 if non-streaming.
-	Attempts   int
-	Kind       FailureKind // Type of failure
-	Err        error
+	Body             string
+	HTTPStatus       int
+	LatencyMs        int64
+	TTFTMs           int64 // Time to first token when Request.Stream == true; 0 if non-streaming.
+	Attempts         int
+	Kind             FailureKind // Type of failure
+	Err              error
+	ToolCalls        []ToolCall // from message.tool_calls (RFC 0002 PR-1)
+	PromptTokens     int        // from usage.prompt_tokens
+	CompletionTokens int        // from usage.completion_tokens
 }
 
 // --- P0: success / failure (UC1, UC7) ---

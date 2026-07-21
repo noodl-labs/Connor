@@ -63,6 +63,48 @@ func TestClient_Execute_success(t *testing.T) {
 	}
 }
 
+func TestClient_Execute_parsesToolCallsAndUsage(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{
+			"choices":[{
+				"message":{
+					"role":"assistant",
+					"content":"",
+					"tool_calls":[
+						{"id":"c1","type":"function","function":{"name":"search","arguments":"{}"}}
+					]
+				}
+			}],
+			"usage":{"prompt_tokens":12,"completion_tokens":3,"total_tokens":15}
+		}`))
+	}))
+	defer srv.Close()
+
+	client, err := NewClient(srv.URL+"/v1", "k", srv.Client())
+	if err != nil {
+		t.Fatal(err)
+	}
+	req, err := entities.NewRequest("m", []entities.Message{{Role: "user", Content: "x"}}, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp, err := client.Execute(context.Background(), req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !resp.Succeeded() {
+		t.Fatalf("resp: %+v", resp)
+	}
+	if len(resp.ToolCalls) != 1 || resp.ToolCalls[0].Name != "search" {
+		t.Fatalf("tool_calls: %+v", resp.ToolCalls)
+	}
+	if resp.PromptTokens != 12 || resp.CompletionTokens != 3 {
+		t.Fatalf("tokens: prompt=%d completion=%d", resp.PromptTokens, resp.CompletionTokens)
+	}
+}
+
 func TestClient_Execute_503_retryable(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusServiceUnavailable)

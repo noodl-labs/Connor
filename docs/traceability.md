@@ -74,7 +74,7 @@ Details: [vision.md](vision.md).
 | Issue opened | ✅ #9 |
 | RFC 0002 Accepted | ✅ |
 | ADR 0002 Accepted | ✅ |
-| PR-1 Parse tool_calls + tokens | 📋 |
+| PR-1 Parse tool_calls + tokens | ✅ `feat/CON07-PARSE-TOOL-CALLS` |
 | PR-2 expect_tool / expect_tool_calls | 📋 |
 | PR-3 --max-cost-regression | 📋 |
 | PR-4 agent-support.yaml + handbook | 📋 |
