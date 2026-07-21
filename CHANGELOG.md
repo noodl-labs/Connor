@@ -2,9 +2,19 @@
 
 ## Unreleased
 
+---
+
+## v0.1.0
+
+**Theme:** Pass-rate gate + CI handbook + regression demo.
+
 ### Added
 - `connor compare ... --min-pass-rate N` — fail if candidate `pass_rate` is below threshold (RFC 0001 §5.3)
 - [CI regression handbook](docs/handbook/ci-regression.md) — baseline → candidate → compare in CI
+- Offline [regression-demo](benchmarks/examples/regression-demo/) fixtures (p95 + pass rate FAIL)
+- Themed compare output (Lipgloss, aligned with `connor run`)
+- [Product vision](docs/vision.md) and [traceability](docs/traceability.md) docs
+- RFC 0002 draft (tool & cost gates, v0.2)
 
 ---
 

@@ -108,7 +108,7 @@ jobs:
 
       - name: Install Connor
         run: |
-          curl -L -o connor https://github.com/noodl-labs/Connor/releases/download/v0.1.0-beta.3/connor-linux-amd64
+          curl -L -o connor https://github.com/noodl-labs/Connor/releases/download/v0.1.0/connor-linux-amd64
           chmod +x connor
           sudo mv connor /usr/local/bin/
 
@@ -141,7 +141,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install Connor
         run: |
-          curl -L -o connor https://github.com/noodl-labs/Connor/releases/download/v0.1.0-beta.3/connor-linux-amd64
+          curl -L -o connor https://github.com/noodl-labs/Connor/releases/download/v0.1.0/connor-linux-amd64
           chmod +x connor
           sudo mv connor /usr/local/bin/
       - name: Export baseline
@@ -162,7 +162,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install Connor
         run: |
-          curl -L -o connor https://github.com/noodl-labs/Connor/releases/download/v0.1.0-beta.3/connor-linux-amd64
+          curl -L -o connor https://github.com/noodl-labs/Connor/releases/download/v0.1.0/connor-linux-amd64
           chmod +x connor
           sudo mv connor /usr/local/bin/
       - name: Download baseline

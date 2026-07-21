@@ -49,11 +49,11 @@ Connor answers: **block the merge before users see it.**
 
 **Option A — Release binary (fastest)**
 
-Download for your platform from [Releases](https://github.com/noodl-labs/Connor/releases) (`v0.1.0-beta.3`):
+Download for your platform from [Releases](https://github.com/noodl-labs/Connor/releases) (`v0.1.0`):
 
 ```bash
 # macOS Apple Silicon example
-curl -L -o connor https://github.com/noodl-labs/Connor/releases/download/v0.1.0-beta.3/connor-darwin-arm64
+curl -L -o connor https://github.com/noodl-labs/Connor/releases/download/v0.1.0/connor-darwin-arm64
 chmod +x connor
 sudo mv connor /usr/local/bin/   # or keep in ./connor
 ```
@@ -102,7 +102,7 @@ Add `-v` to see response bodies on passed cases.
 **Expected output:**
 
 ```text
-Connor  v0.1.0-beta.3
+Connor  v0.1.0
 Target  https://openrouter.ai/api/v1
 Suite   agent-json-smoke (2 cases)
 
@@ -164,7 +164,7 @@ jobs:
 
       - name: Install Connor
         run: |
-          curl -L -o connor https://github.com/noodl-labs/Connor/releases/download/v0.1.0-beta.3/connor-linux-amd64
+          curl -L -o connor https://github.com/noodl-labs/Connor/releases/download/v0.1.0/connor-linux-amd64
           chmod +x connor
           sudo mv connor /usr/local/bin/
 
@@ -263,15 +263,15 @@ Details: [docs/architecture.md](docs/architecture.md) · [Roadmap](ROADMAP.md) �
 
 ## Status
 
-**Current release:** [`v0.1.0-beta.3`](https://github.com/noodl-labs/Connor/releases/tag/v0.1.0-beta.3)
+**Current release:** [`v0.1.0`](https://github.com/noodl-labs/Connor/releases/tag/v0.1.0)
 
 - `connor run` — YAML suites, JSON / schema / contains gates
 - `connor run --out run.json` — run artifact
-- `connor compare --max-p95-regression` — p95 regression + driver case on FAIL
+- `connor compare` — p95 + pass-rate gates, themed output
 
-**Next (`v0.1.0`):** tag release
+**Docs:** [Vision](docs/vision.md) · [Traceability](docs/traceability.md) · [CI handbook](docs/handbook/ci-regression.md)
 
-Guide: [CI regression handbook](docs/handbook/ci-regression.md).
+**Next (`v0.2.0`):** tool calls + cost — [RFC 0002](docs/rfc/0002-tool-and-cost-gates.md)
 
 ---
 

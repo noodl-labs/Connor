@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Vision & roadmap
+    url: https://github.com/noodl-labs/Connor/blob/main/docs/vision.md
+    about: Product north star and phased evolution
+  - name: Traceability (RFC / ADR index)
+    url: https://github.com/noodl-labs/Connor/blob/main/docs/traceability.md
+    about: Map releases to design docs

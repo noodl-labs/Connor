@@ -2,14 +2,18 @@
 
 > **The CI/CD reliability toolkit for AI systems** — quality gates before merge.
 
-**Current release:** [v0.1.0-beta.3](CHANGELOG.md#v010-beta3)  
-**Status:** Beta — serving smoke, agent output gates, p95 regression compare.
+**Current release:** [v0.1.0](CHANGELOG.md#v010)  
+**Status:** v0.1 shipped — AI Testing + first AI Regression gates (Go).
+
+**North star:** [docs/vision.md](docs/vision.md) · **Doc map:** [docs/traceability.md](docs/traceability.md)
 
 ---
 
 ## Vision
 
-Block merges when LLM/agent runtime regresses — availability, structured output, latency — using versioned YAML suites and `exit 0` / `exit 1`.
+Block merges when LLM/agent runtime regresses — availability, structured output, latency, pass rate — using versioned YAML suites and `exit 0` / `exit 1`.
+
+**Product category:** AI Release Engineering (gatekeeper, not dashboard). See [vision.md](docs/vision.md).
 
 **Not in scope:** production observability (Langfuse), model intelligence benchmarks (MMLU).
 
@@ -22,7 +26,7 @@ Block merges when LLM/agent runtime regresses — availability, structured outpu
 | **v0.1.0-beta.1** ✅ | Serving smoke | "Does my endpoint respond?" |
 | **v0.1.0-beta.2** ✅ | Agent output gates | "Does output match the contract?" |
 | **v0.1.0-beta.3** ✅ | Regression compare (p95) | "Did p95 regress vs baseline?" |
-| **v0.1.0** 🔜 | Pass-rate gate + handbook | Full v0.1 regression gates |
+| **v0.1.0** ✅ | Pass-rate gate + handbook | Full v0.1 regression gates |
 | **v0.2.0** 📋 | Tool calls + cost | "Did the agent call the right tool?" |
 | **v1.0.0** 📋 | Full agent CI | Workflows, replay, semantic eval (Python) |
 
@@ -63,7 +67,7 @@ Dates are indicative — ship when **exit criteria** below are met.
 | 22 | Groundedness | Answer anchored in docs? | 📋 v1 | Python eval service |
 | | **DX & CI** | | | |
 | 23 | Exit code CI | GitHub Actions PASS/FAIL? | ✅ beta.1 | `echo $?` |
-| 24 | JSON artifact | Store results for compare? | 🔜 v0.1 | `--out run.json` |
+| 24 | JSON artifact | Store results for compare? | ✅ v0.1 | `--out run.json` |
 | 25 | Prompt A vs B | New prompt regresses? | 📋 v1 | Prompt diff |
 
 ---
@@ -101,7 +105,27 @@ Dates are indicative — ship when **exit criteria** below are met.
 
 ---
 
-## In progress — toward v0.1.0
+## Shipped — v0.1.0
+
+**Theme:** Pass-rate gate + CI handbook + regression demo
+
+### Quality Gates
+- [x] `--min-pass-rate` on compare (RFC 0001 §5.3)
+- [x] Themed compare output (Lipgloss)
+
+### Developer Experience
+- [x] [docs/handbook/ci-regression.md](docs/handbook/ci-regression.md)
+- [x] [benchmarks/examples/regression-demo/](benchmarks/examples/regression-demo/)
+- [x] [docs/vision.md](docs/vision.md), [docs/traceability.md](docs/traceability.md)
+- [ ] LICENSE
+
+### Exit criteria
+- [x] All v0.1 RFC 0001 §8 items
+- [x] Tag `v0.1.0` published
+
+---
+
+## Shipped — toward v0.1.0 (beta → v0.1)
 
 **Theme:** Regression testing & budget gates
 
@@ -117,21 +141,13 @@ Dates are indicative — ship when **exit criteria** below are met.
 
 ### Developer Experience
 - [x] README + architecture + `.env.example`
-- [x] `docs/ci-github-actions.md` → [docs/handbook/ci-regression.md](docs/handbook/ci-regression.md)
-- [ ] LICENSE
-
-### Exit criteria for v0.1.0
-- [x] `connor run suite.yaml --out run.json` works
-- [x] `connor compare` blocks on latency regression in demo
-- [x] `connor compare` respects `--min-pass-rate`
-- [x] Documented in handbook
-- [ ] Tag `v0.1.0` published
+- [x] Handbook (was `docs/ci-github-actions.md`)
 
 ---
 
 ## Planned — v0.2.0
 
-**Theme:** Tool calls + cost gates (L3)
+**Theme:** Tool calls + cost gates (L3) — see [RFC 0002](docs/rfc/0002-tool-and-cost-gates.md)
 
 ### Evaluation & Execution
 - [ ] Parse `tool_calls` from API response
@@ -175,7 +191,7 @@ Details: [docs/architecture.md](docs/architecture.md)
 
 | # | Feature | Status | Release |
 |---|---------|--------|---------|
-| 1 | Regression testing | compare p95 shipped | beta.3 ✅ / v0.1 🔜 |
+| 1 | Regression testing | compare p95 + pass rate | v0.1 ✅ |
 | 2 | Tool call verification | — | v0.2 |
 | 3 | Reliability score | — | v1 |
 | 4 | Budget guard | Latency display only | v0.1 / v0.2 |

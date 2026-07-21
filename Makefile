@@ -6,7 +6,7 @@
 
 RUNTIME_DIR := services/runtime
 BINARY      := bin/connor
-VERSION     ?= v0.1.0-beta.3
+VERSION     ?= v0.1.0
 LDFLAGS     := -X github.com/noodl-labs/ConnorLLM/services/runtime/internal/cli.Version=$(VERSION)
 
 # ── Colors ───────────────────────────────────────────────────────────
