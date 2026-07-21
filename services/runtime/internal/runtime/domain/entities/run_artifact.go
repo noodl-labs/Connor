@@ -29,22 +29,28 @@ type RunArtifact struct {
 
 // RunCase is one exported case row (must include id + model for compare).
 type RunCase struct {
-	ID        string `json:"id"`
-	Model     string `json:"model"`
-	Passed    bool   `json:"passed"`
-	Reason    string `json:"reason"`
-	LatencyMs int64  `json:"latency_ms"`
-	Attempts  int    `json:"attempts"`
+	ID               string     `json:"id"`
+	Model            string     `json:"model"`
+	Passed           bool       `json:"passed"`
+	Reason           string     `json:"reason"`
+	LatencyMs        int64      `json:"latency_ms"`
+	Attempts         int        `json:"attempts"`
+	ToolCalls        []ToolCall `json:"tool_calls,omitempty"`
+	PromptTokens     int        `json:"prompt_tokens,omitempty"`
+	CompletionTokens int        `json:"completion_tokens,omitempty"`
 }
 
-// RunSummary holds suite-level KPIs for compare gates (PR-2/PR-3).
+// RunSummary holds suite-level KPIs for compare gates (RFC 0001 / 0002).
 type RunSummary struct {
-	Total    int     `json:"total"`
-	Passed   int     `json:"passed"`
-	Failed   int     `json:"failed"`
-	PassRate float64 `json:"pass_rate"`
-	P50Ms    int64   `json:"p50_ms"`
-	P95Ms    int64   `json:"p95_ms"`
+	Total            int     `json:"total"`
+	Passed           int     `json:"passed"`
+	Failed           int     `json:"failed"`
+	PassRate         float64 `json:"pass_rate"`
+	P50Ms            int64   `json:"p50_ms"`
+	P95Ms            int64   `json:"p95_ms"`
+	PromptTokens     int     `json:"prompt_tokens,omitempty"`
+	CompletionTokens int     `json:"completion_tokens,omitempty"`
+	TotalTokens      int     `json:"total_tokens,omitempty"`
 }
 
 var (
@@ -60,6 +66,7 @@ var (
 //   - metas[i].ID == results[i].CaseID
 //   - p50/p95 over ALL case latencies (passed + failed) — RFC 0001 §4
 //   - pass_rate = passed / total * 100
+//   - summary token totals = sum of per-case tokens — RFC 0002 §4.3
 func BuildRunArtifact(
 	suiteID string,
 	target string,
@@ -76,6 +83,8 @@ func BuildRunArtifact(
 	cases := make([]RunCase, len(metas))
 	latencies := make([]int64, len(metas))
 	passed := 0
+	promptTokens := 0
+	completionTokens := 0
 
 	for i := range metas {
 		// Defense in depth: YAML row must align with execution result.
@@ -86,12 +95,16 @@ func BuildRunArtifact(
 			return RunArtifact{}, fmt.Errorf("entities: case %d missing id or model", i)
 		}
 
+		resp := results[i].Response
 		rc := RunCase{
-			ID:        metas[i].ID,
-			Model:     metas[i].Model, // ADR 0001: required for future compare
-			Passed:    results[i].Passed,
-			LatencyMs: results[i].Response.LatencyMs,
-			Attempts:  results[i].Response.Attempts,
+			ID:               metas[i].ID,
+			Model:            metas[i].Model, // ADR 0001: required for future compare
+			Passed:           results[i].Passed,
+			LatencyMs:        resp.LatencyMs,
+			Attempts:         resp.Attempts,
+			ToolCalls:        resp.ToolCalls,
+			PromptTokens:     resp.PromptTokens,
+			CompletionTokens: resp.CompletionTokens,
 		}
 		if results[i].Passed {
 			rc.Reason = ""
@@ -101,6 +114,8 @@ func BuildRunArtifact(
 
 		cases[i] = rc
 		latencies[i] = rc.LatencyMs
+		promptTokens += resp.PromptTokens
+		completionTokens += resp.CompletionTokens
 		if rc.Passed {
 			passed++
 		}
@@ -108,12 +123,15 @@ func BuildRunArtifact(
 
 	total := len(cases)
 	summary := RunSummary{
-		Total:    total,
-		Passed:   passed,
-		Failed:   total - passed,
-		PassRate: float64(passed) / float64(total) * 100,
-		P50Ms:    percentileMs(latencies, 0.50),
-		P95Ms:    percentileMs(latencies, 0.95),
+		Total:            total,
+		Passed:           passed,
+		Failed:           total - passed,
+		PassRate:         float64(passed) / float64(total) * 100,
+		P50Ms:            percentileMs(latencies, 0.50),
+		P95Ms:            percentileMs(latencies, 0.95),
+		PromptTokens:     promptTokens,
+		CompletionTokens: completionTokens,
+		TotalTokens:      promptTokens + completionTokens,
 	}
 
 	return RunArtifact{

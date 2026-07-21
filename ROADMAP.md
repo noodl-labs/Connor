@@ -151,7 +151,7 @@ Dates are indicative — ship when **exit criteria** below are met.
 **Tracking:** [#9](https://github.com/noodl-labs/Connor/issues/9) · [RFC 0002](docs/rfc/0002-tool-and-cost-gates.md) (Accepted) · [ADR 0002](docs/adr/0002-cost-regression-tokens.md)
 
 ### Evaluation & Execution
-- [ ] Parse `tool_calls` from API response (PR-1)
+- [x] Parse `tool_calls` from API response (PR-1)
 - [ ] `expect_tool` / `expect_tool_calls` (name, order) (PR-2)
 - [ ] Token usage in run.json + `--max-cost-regression` (PR-3)
 - [ ] `benchmarks/examples/agent-support.yaml` + handbook (PR-4)
