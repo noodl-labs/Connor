@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "suite_id": "tool-parse-demo",
+  "target": "https://openrouter.ai/api/v1",
+  "cases": [
+    {
+      "id": "find-flight",
+      "model": "openai/gpt-4o-mini",
+      "passed": true,
+      "reason": "",
+      "latency_ms": 420,
+      "attempts": 1,
+      "tool_calls": [{ "name": "search" }],
+      "prompt_tokens": 120,
+      "completion_tokens": 40
+    },
+    {
+      "id": "book-flight",
+      "model": "openai/gpt-4o-mini",
+      "passed": true,
+      "reason": "",
+      "latency_ms": 610,
+      "attempts": 1,
+      "tool_calls": [{ "name": "search" }, { "name": "book" }],
+      "prompt_tokens": 200,
+      "completion_tokens": 80
+    }
+  ],
+  "summary": {
+    "total": 2,
+    "passed": 2,
+    "failed": 0,
+    "pass_rate": 100,
+    "p50_ms": 420,
+    "p95_ms": 610,
+    "prompt_tokens": 320,
+    "completion_tokens": 120,
+    "total_tokens": 440
+  }
+}
