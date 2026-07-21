@@ -147,17 +147,21 @@ Dates are indicative — ship when **exit criteria** below are met.
 
 ## Planned — v0.2.0
 
-**Theme:** Tool calls + cost gates (L3) — see [RFC 0002](docs/rfc/0002-tool-and-cost-gates.md)
+**Theme:** Tool calls + cost gates (L3)  
+**Tracking:** [#9](https://github.com/noodl-labs/Connor/issues/9) · [RFC 0002](docs/rfc/0002-tool-and-cost-gates.md) (Accepted) · [ADR 0002](docs/adr/0002-cost-regression-tokens.md)
 
 ### Evaluation & Execution
-- [ ] Parse `tool_calls` from API response
-- [ ] `expect_tool` / `expect_tool_calls` (name, order)
-- [ ] Agent HTTP provider (custom URL)
-- [ ] Token usage from `usage` field, `max_cost_regression`
+- [ ] Parse `tool_calls` from API response (PR-1)
+- [ ] `expect_tool` / `expect_tool_calls` (name, order) (PR-2)
+- [ ] Token usage in run.json + `--max-cost-regression` (PR-3)
+- [ ] `benchmarks/examples/agent-support.yaml` + handbook (PR-4)
+- [ ] Agent HTTP provider (custom URL) (PR-5, may slip to 0.2.1)
 
 ### Exit criteria for v0.2.0
-- [ ] Demo: wrong tool → `exit 1`
-- [ ] `benchmarks/examples/agent-support.yaml`
+- [ ] Wrong tool → `connor run` exit 1 (`tool_mismatch` / `tool_order_mismatch`)
+- [ ] Cost regression demo with `compare --max-cost-regression`
+- [ ] Example suite + CHANGELOG + ci-gates rule
+- [ ] Tag `v0.2.0`
 
 ---
 

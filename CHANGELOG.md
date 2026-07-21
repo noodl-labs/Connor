@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Docs
+- RFC 0002 Accepted (tool & cost gates); ADR 0002 (token delta); tracking issue #9
+
 ---
 
 ## v0.1.0
