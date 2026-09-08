@@ -17,7 +17,7 @@ Do **not** RFC: bug fixes, refactors, docs-only, Lipgloss tweaks.
 docs/rfc/NNNN-short-kebab-title.md
 ```
 
-Next number: **0003** (after 0002 ships or is superseded).
+Next number: **0004**.
 
 ## Template
 

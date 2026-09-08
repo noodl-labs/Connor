@@ -1,16 +1,17 @@
 # Connor
 
-**CI smoke tests for LLM endpoints and agents.**
+**CI for AI Agents** — and, today, CI smoke tests for LLM HTTP endpoints.
 
-Before you merge: does your gateway still respond? Is the JSON still valid? Does your schema still match?
+Before you merge: does your gateway still respond? Is the JSON still valid? Does your schema still match?  
+Next: did the agent call `refund` twice, blow the latency budget, or explode tool volume vs `main`?
 
 ```bash
 connor run suite.yaml   # exit 0 = safe to merge · exit 1 = block the PR
 ```
 
-Your agent stays Python (or any stack). Connor only needs an **OpenAI-compatible HTTP endpoint** (`/v1/chat/completions`).
+Your agent stays Python (or any stack). Connor today only needs an **OpenAI-compatible HTTP endpoint** (`/v1/chat/completions`). A Python `trace()` / `@tool` SDK is [designed, not shipped](docs/rfc/0003-agent-ci-tracing.md).
 
-**Not** a production observability platform (Langfuse, LangSmith). Connor runs **in CI** — like unit tests for your LLM layer.
+**Not** a production observability platform (Langfuse, LangSmith). **Not** an agent framework. Connor runs **in CI** — like unit tests for your LLM / agent layer.
 
 ---
 
@@ -247,7 +248,7 @@ They observe production traffic. Connor runs **before merge** in CI with determi
 Promptfoo excels at eval and prompt comparison. Connor focuses on **CI gates**: block merges when HTTP/JSON/schema/latency regresses.
 
 **Do I need to change my agent code?**  
-No. Connor calls the same HTTP endpoint your app uses.
+Not for HTTP smoke tests. Connor calls the same endpoint your app uses. The planned tracing SDK is opt-in instrumentation (`@tool`), not a rewrite of your agent.
 
 **Can I compare different models (GPT-4 vs GPT-5)?**  
 No. Compare requires the same suite, case IDs, and models per case (baseline vs candidate = same config, different point in time).
@@ -257,7 +258,7 @@ No. Compare requires the same suite, case IDs, and models per case (baseline vs 
 ## Architecture
 
 Connor is organized into six engines (execution, evaluation, benchmark, quality gates, observability, DX).  
-Details: [docs/architecture.md](docs/architecture.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md)
+Details: [docs/architecture.md](docs/architecture.md) · [Roadmap](ROADMAP.md) · [Agent CI RFC](docs/rfc/0003-agent-ci-tracing.md) · [Changelog](CHANGELOG.md)
 
 ---
 
@@ -271,7 +272,10 @@ Details: [docs/architecture.md](docs/architecture.md) · [Roadmap](ROADMAP.md) �
 
 **Docs:** [Vision](docs/vision.md) · [Traceability](docs/traceability.md) · [CI handbook](docs/handbook/ci-regression.md)
 
-**Next (`v0.2.0`):** tool calls + cost — [RFC 0002](docs/rfc/0002-tool-and-cost-gates.md)
+**Next:**
+
+- `v0.2.0` — HTTP tool names + cost — [RFC 0002](docs/rfc/0002-tool-and-cost-gates.md)
+- `v0.3.0` — Agent tracing / inspect / trajectory gates — [RFC 0003](docs/rfc/0003-agent-ci-tracing.md) (Draft; first PR = data model + Python SDK only)
 
 ---
 
