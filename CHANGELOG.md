@@ -3,6 +3,11 @@
 ## Unreleased
 
 ### Docs
+- RFC 0003 Draft: CI for AI Agents (tracing, inspect, trajectory gates, replay)
+- ADR 0003 (JSON spans, not OpenTelemetry runtime); ADR 0004 (`run.json` v1 stays additive)
+- Roadmap / vision / architecture / traceability aligned on Agent CI vs Runtime
+
+### Docs (v0.2)
 - RFC 0002 Accepted (tool & cost gates); ADR 0002 (token delta); tracking issue #9
 
 ---
