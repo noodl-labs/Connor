@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+- Python SDK `trace()` / `@tool` writes additive `cases[].trajectory` on `run.json` version 1 (RFC 0003 P1)
+- Domain types `Trajectory` / `Span`; fail reason `agent_failed` (gates not wired yet)
+
 ### Docs
 - RFC 0003 Draft: CI for AI Agents (tracing, inspect, trajectory gates, replay)
 - ADR 0003 (JSON spans, not OpenTelemetry runtime); ADR 0004 (`run.json` v1 stays additive)

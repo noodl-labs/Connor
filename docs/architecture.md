@@ -112,7 +112,7 @@ ConnorLLM/
 │           ├── application/    # ExecuteSuite, EvaluateCase (HTTP)
 │           ├── domain/         # Entities, validation, reliability
 │           └── infrastructure/ # openai_compatible provider
-├── sdk/python/connor/          # Planned RFC 0003 — trace / @tool (not shipped)
+├── sdk/python/connor/          # RFC 0003 P1 — trace / @tool (writes run.json)
 ├── benchmarks/examples/        # Runnable demo suites + offline fixtures
 ├── docs/                       # RFC, ADR, architecture, vision
 └── ROADMAP.md

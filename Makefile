@@ -2,7 +2,7 @@
 # Usage: make help
 # Disable colors: make check NO_COLOR=1
 
-.PHONY: help install build test test-race lint fmt tidy verify check ci smoke smoke-cli release-dry
+.PHONY: help install build test test-race test-python lint fmt tidy verify check ci smoke smoke-cli demo-trace release-dry
 
 RUNTIME_DIR := services/runtime
 BINARY      := bin/connor
@@ -37,6 +37,8 @@ help:
 	@echo "  $(GREEN)make check$(RESET)        → before commit (lint + tests + build)"
 	@echo "  $(GREEN)make ci$(RESET)           → same gates as GitHub Actions"
 	@echo "  $(BLUE)make test$(RESET)         → fast unit tests"
+	@echo "  $(BLUE)make test-python$(RESET)  → Python SDK unit tests"
+	@echo "  $(YELLOW)make demo-trace$(RESET)    → run support-agent example → tmp/support-agent.json"
 	@echo "  $(BLUE)make lint$(RESET)         → golangci-lint"
 	@echo "  $(BLUE)make build$(RESET)        → compile bin/connor"
 	@echo "  $(BLUE)make install$(RESET)      → install connor to \$$PATH"
@@ -48,10 +50,10 @@ help:
 	@echo "  $(DIM)NO_COLOR=1 make check$(RESET)  → disable colors"
 
 # ── Daily dev ────────────────────────────────────────────────────────
-check: lint test-race build
+check: lint test-race test-python build
 	@echo "$(GREEN)✓ check OK — safe to commit$(RESET)"
 
-ci: verify test-race build smoke-cli
+ci: verify test-race test-python build smoke-cli
 	@echo "$(GREEN)✓ ci OK — matches GitHub Actions$(RESET)"
 
 # ── Go ───────────────────────────────────────────────────────────────
@@ -62,6 +64,16 @@ verify:
 test:
 	@echo "$(YELLOW)→ test$(RESET)"
 	@cd $(RUNTIME_DIR) && go test ./...
+
+test-python:
+	@echo "$(YELLOW)→ test (python sdk)$(RESET)"
+	@cd sdk/python && PYTHONPATH=. python3 -m unittest discover -s tests -v
+
+demo-trace:
+	@echo "$(YELLOW)→ support-agent demo$(RESET)"
+	@PYTHONPATH=sdk/python python3 sdk/python/examples/support_agent.py --out tmp/support-agent.json $(ARGS)
+	@echo "$(DIM)Go still accepts the golden fixture:$(RESET)"
+	@cd $(RUNTIME_DIR) && go test ./internal/runtime/domain/entities/ -run ParseRunArtifactJSON_trajectoryGolden -count=1
 
 test-race:
 	@echo "$(YELLOW)→ test (race)$(RESET)"
