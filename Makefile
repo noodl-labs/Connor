@@ -2,7 +2,7 @@
 # Usage: make help
 # Disable colors: make check NO_COLOR=1
 
-.PHONY: help install build test test-race test-python lint fmt tidy verify check ci smoke smoke-cli demo-trace release-dry
+.PHONY: help install build test test-race test-python lint fmt tidy verify check ci smoke smoke-cli demo-trace demo-trace-complex release-dry
 
 RUNTIME_DIR := services/runtime
 BINARY      := bin/connor
@@ -39,6 +39,7 @@ help:
 	@echo "  $(BLUE)make test$(RESET)         → fast unit tests"
 	@echo "  $(BLUE)make test-python$(RESET)  → Python SDK unit tests"
 	@echo "  $(YELLOW)make demo-trace$(RESET)    → run support-agent example → tmp/support-agent.json"
+	@echo "  $(YELLOW)make demo-trace-complex$(RESET) → parallel + nested + retry agent"
 	@echo "  $(BLUE)make lint$(RESET)         → golangci-lint"
 	@echo "  $(BLUE)make build$(RESET)        → compile bin/connor"
 	@echo "  $(BLUE)make install$(RESET)      → install connor to \$$PATH"
@@ -74,6 +75,10 @@ demo-trace:
 	@PYTHONPATH=sdk/python python3 sdk/python/examples/support_agent.py --out tmp/support-agent.json $(ARGS)
 	@echo "$(DIM)Go still accepts the golden fixture:$(RESET)"
 	@cd $(RUNTIME_DIR) && go test ./internal/runtime/domain/entities/ -run ParseRunArtifactJSON_trajectoryGolden -count=1
+
+demo-trace-complex:
+	@echo "$(YELLOW)→ complex agent demo$(RESET)"
+	@PYTHONPATH=sdk/python python3 sdk/python/examples/complex_agent.py --out tmp/support-agent-complex.json $(ARGS)
 
 test-race:
 	@echo "$(YELLOW)→ test (race)$(RESET)"
