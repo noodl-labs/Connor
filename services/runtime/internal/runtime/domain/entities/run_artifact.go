@@ -29,12 +29,13 @@ type RunArtifact struct {
 
 // RunCase is one exported case row (must include id + model for compare).
 type RunCase struct {
-	ID        string `json:"id"`
-	Model     string `json:"model"`
-	Passed    bool   `json:"passed"`
-	Reason    string `json:"reason"`
-	LatencyMs int64  `json:"latency_ms"`
-	Attempts  int    `json:"attempts"`
+	ID         string      `json:"id"`
+	Model      string      `json:"model"`
+	Passed     bool        `json:"passed"`
+	Reason     string      `json:"reason"`
+	LatencyMs  int64       `json:"latency_ms"`
+	Attempts   int         `json:"attempts"`
+	Trajectory *Trajectory `json:"trajectory,omitempty"` // RFC 0003; HTTP BuildRunArtifact leaves nil
 }
 
 // RunSummary holds suite-level KPIs for compare gates (PR-2/PR-3).
