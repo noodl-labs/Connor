@@ -1,13 +1,15 @@
 # Connor — Product vision
 
-> **AI Release Engineering** — decide whether a new AI system version is safe to deploy.
+> **CI for AI Agents** — decide whether a new agent or LLM system version is safe to merge.
+
+Longer-term: **reliability infrastructure for AI agents**. That is a later product. Ship CI gates first.
 
 ---
 
 ## One-liner
 
-DeepEval measures answer quality. Langfuse observes production. Promptfoo compares prompts.  
-**Connor decides if you can merge and deploy** — via CI gates, not dashboards.
+DeepEval measures answer quality. Langfuse observes production. Promptfoo compares prompts. Agent frameworks *run* agents.  
+**Connor decides if you can merge** — via CI gates on HTTP responses **and** (v0.3) recorded agent trajectories. It does not become your runtime.
 
 ---
 
@@ -53,18 +55,20 @@ Each phase adds a layer. Ship incrementally — do not build V10 before V2 works
 |-------|------|----------|--------------|
 | **V0** | Engineering foundation | Is the engine reliable? | ✅ Go runtime, YAML, provider, retry, tests |
 | **V1** | AI Testing | Does my system still work? | ✅ `connor run`, gates, exit 0/1 |
-| **V2** | AI Regression | Did we degrade vs baseline? | ✅ `compare`, p95, pass rate (Go) |
+| **V2** | AI Regression | Did we degrade vs baseline? | ✅ `compare`, p95, pass rate (Go); tokens v0.2; tool volume v0.3 |
+| **V2b** | CI for AI Agents | What did the agent *do*? | 📋 RFC 0003 — trace, inspect, trajectory gates, narrow replay |
 | **V3** | AI Release Engineering | Can we merge this PR? | 🟡 Handbook + CLI flags; Action/PR comments later |
-| **V4** | AI Reliability Platform | Why is this version worse? | 🟡 p95 driver only; RCA taxonomy later |
+| **V4** | AI Reliability Platform | Why is this version worse? | 🟡 p95 driver only; **deterministic** inspect first; LLM RCA later |
 | **V5** | AI Assets Platform | What assets define this run? | ❌ Versioned prompts, baselines, datasets |
-| **V6–V10** | Deployments → Control Plane | Prod lifecycle, obs, FinOps | ❌ Out of scope until V2–V4 land |
+| **V6–V10** | Runtime / Control Plane | Prod enforcement, policies, FinOps | ❌ **After** V2b works. Do not build Runtime in the Agent CI MVP. |
 
 **Language split (intentional):**
 
-- **Go** — execution, hard gates, `run.json`, `compare`, exit codes (CI contract).
-- **Python** (v1+) — soft evaluators (semantic similarity, groundedness) feeding the same artifacts.
+- **Go** — execution (HTTP), hard gates, `run.json`, `compare` / `inspect`, exit codes (CI contract).
+- **Python SDK** (v0.3) — `trace()` / `@tool` in the user’s process; writes `run.json`. Not an agent framework.
+- **Python eval service** (v1+) — soft evaluators (semantic similarity, groundedness) feeding the same artifacts.
 
-Do not rewrite regression compare in Python — extend with eval scores later.
+Do not rewrite regression compare in Python. Do not put semantic judges in the tracing SDK.
 
 ---
 
@@ -88,7 +92,8 @@ Capabilities to deepen V2→V4 without changing category:
 
 - Production observability (Langfuse, LangSmith)
 - Academic model benchmarks (MMLU)
-- A chatbot framework
+- A chatbot / agent framework
+- An MCP server, scheduler, or production policy runtime
 - A generic LLM playground
 
 ---

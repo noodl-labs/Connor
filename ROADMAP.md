@@ -1,21 +1,26 @@
 # ConnorLLM Roadmap
 
-> **The CI/CD reliability toolkit for AI systems** — quality gates before merge.
+> **CI for AI Agents** — test agent behavior, tool usage, reliability, latency, and cost before shipping.
 
 **Current release:** [v0.1.0](CHANGELOG.md#v010)  
-**Status:** v0.1 shipped — AI Testing + first AI Regression gates (Go).
+**Status:** v0.1 shipped (HTTP smoke + JSON/schema + p95/pass-rate). RFC 0002 (HTTP tools/cost) in progress. RFC 0003 (agent tracing) in design.
 
-**North star:** [docs/vision.md](docs/vision.md) · **Doc map:** [docs/traceability.md](docs/traceability.md)
+**Longer-term vision:** reliability infrastructure for AI agents — **not** this MVP. See [docs/vision.md](docs/vision.md).
+
+**North star:** [docs/vision.md](docs/vision.md) · **Agent CI RFC:** [docs/rfc/0003-agent-ci-tracing.md](docs/rfc/0003-agent-ci-tracing.md) · **Doc map:** [docs/traceability.md](docs/traceability.md)
 
 ---
 
 ## Vision
 
-Block merges when LLM/agent runtime regresses — availability, structured output, latency, pass rate — using versioned YAML suites and `exit 0` / `exit 1`.
+Block merges when an **LLM endpoint or AI agent** regresses — availability, structured output, **tool usage**, latency, pass rate, cost — using versioned artifacts and `exit 0` / `exit 1`.
 
-**Product category:** AI Release Engineering (gatekeeper, not dashboard). See [vision.md](docs/vision.md).
+**Today (v0.1):** Connor calls your OpenAI-compatible HTTP API (black-box).  
+**Next (v0.3):** you keep your agent stack; a Python SDK records the trajectory; Connor inspects, asserts, and compares the same `run.json`.
 
-**Not in scope:** production observability (Langfuse), model intelligence benchmarks (MMLU).
+**Product category:** AI Release Engineering (gatekeeper, not dashboard, not agent framework). See [vision.md](docs/vision.md).
+
+**Not in this MVP:** production observability (Langfuse), orchestrating agents, MCP proxy, policy enforcement, LLM-as-judge RCA, MMLU.
 
 ---
 
@@ -27,10 +32,13 @@ Block merges when LLM/agent runtime regresses — availability, structured outpu
 | **v0.1.0-beta.2** ✅ | Agent output gates | "Does output match the contract?" |
 | **v0.1.0-beta.3** ✅ | Regression compare (p95) | "Did p95 regress vs baseline?" |
 | **v0.1.0** ✅ | Pass-rate gate + handbook | Full v0.1 regression gates |
-| **v0.2.0** 📋 | Tool calls + cost | "Did the agent call the right tool?" |
-| **v1.0.0** 📋 | Full agent CI | Workflows, replay, semantic eval (Python) |
+| **v0.2.0** 📋 | HTTP tool names + token cost | "Did this chat completion *request* the right tool?" |
+| **v0.3.0** 📋 | Agent CI (trace → inspect → gates → compare → replay) | "What did the agent *do*, and did that regress?" |
+| **v1.0.0** 📋 | Semantic eval + richer workflows | Soft judges (Python service), not a rewrite of Go gates |
 
 Dates are indicative — ship when **exit criteria** below are met.
+
+v0.3 is **phased** (RFC 0003). First PR is data model + Python `trace`/`@tool` only — not the whole table.
 
 ---
 
@@ -55,14 +63,19 @@ Dates are indicative — ship when **exit criteria** below are met.
 | | **Regression & budget** | | | |
 | 13 | Latency regression | p95 vs baseline? | ✅ beta.3 | `connor compare` |
 | 14 | Pass rate | Success rate ≥ threshold? | ✅ v0.1 | `--min-pass-rate` |
-| 15 | Token cost | API budget exceeded? | 📋 v0.2 | `max_cost_regression` |
-| | **Agent & tools** | | | |
-| 16 | Tool call present | Agent called `search`? | 📋 v0.2 | `expect_tool` |
-| 17 | Tool order | Multi-step plan respected? | 📋 v0.2 | `expect_tool_calls` |
-| 18 | Custom agent HTTP | Non-OpenAI agent API? | 📋 v0.2 | Agent provider URL |
+| 15 | Token cost | API budget exceeded? | 📋 v0.2 | `max_cost_regression` (tokens, ADR 0002) |
+| | **Agent & tools (HTTP message)** | | | |
+| 16 | Tool name present | Model requested `search`? | 📋 v0.2 | `expect_tool` (RFC 0002) |
+| 17 | Tool name order | Requested names in order? | 📋 v0.2 | `expect_tool_calls` |
+| 18 | Custom agent HTTP | Non-`/chat/completions` URL? | 📋 v0.2 | Agent provider (may slip) |
+| | **Agent CI (executed trajectory)** | | | |
+| 26 | Trace primitive | Record tool/LLM spans in CI? | 📋 v0.3 P1 | Python `trace` / `@tool` |
+| 27 | Inspect | Explain a run without an LLM? | 📋 v0.3 P2 | `connor inspect` |
+| 28 | Trajectory assertions | `refund` at most once? | 📋 v0.3 P3 | `inspect --expect` |
+| 29 | Tool-volume regression | Calls/run exploded vs main? | 📋 v0.3 P4 | `compare --max-tool-calls-regression` |
+| 20 | Replay (narrow) | Re-run with recorded tool outputs? | 📋 v0.3 P5 | `connor replay` — not prod time-travel |
 | | **Workflow & semantic** | | | |
-| 19 | Multi-step | Chained scenario? | 📋 v1 | Workflow YAML |
-| 20 | Replay prod | Replay prod run in CI? | 📋 v1 | `connor replay` |
+| 19 | Multi-step YAML workflows | Chained HTTP scenarios? | 📋 v1 | Still not an orchestrator |
 | 21 | Semantic similarity | "Close enough" answer? | 📋 v1 | Python eval service |
 | 22 | Groundedness | Answer anchored in docs? | 📋 v1 | Python eval service |
 | | **DX & CI** | | | |
@@ -165,14 +178,77 @@ Dates are indicative — ship when **exit criteria** below are met.
 
 ---
 
+## Planned — v0.3.0
+
+**Theme:** CI for AI Agents (white-box trajectory)  
+**Tracking:** [RFC 0003](docs/rfc/0003-agent-ci-tracing.md) (Draft) · [ADR 0003](docs/adr/0003-trace-model-not-otel.md) · [ADR 0004](docs/adr/0004-run-artifact-additive-trajectory.md)
+
+Does **not** replace v0.2 HTTP `tool_calls`. Complementary surface: Python SDK writes `run.json`; Go CLI stays the CI contract.
+
+| Phase | User-visible | First-PR sized? |
+|-------|----------------|-----------------|
+| **P1** | `with trace():` + `@tool` → `run.json` trajectory | **Yes — start here** |
+| **P2** | `connor inspect run.json` | After P1 |
+| **P3** | `inspect --expect` trajectory gates | After P2 |
+| **P4** | `compare --max-tool-calls-regression` | After P1 (needs summary counters) |
+| **P5** | `connor replay` (tool stubs only) | After P1 + P4 |
+
+### Exit criteria for v0.3.0
+- [ ] Sync + async `@tool` spans correlated; exceptions re-raised
+- [ ] `connor inspect` renders trajectory from `run.json` (no LLM)
+- [ ] Forbidden / max tool-call gates fail `connor` with stable reasons
+- [ ] Compare AND-composes tool-call regression with p95 / pass-rate
+- [ ] Replay guarantees documented; HTTP-only artifact → exit 2
+- [ ] Existing HTTP suites unchanged
+- [ ] Tag `v0.3.0` (may ship as 0.3.0-alpha after P1–P2)
+
+### First PR (P1 only — do not bundle P2–P5)
+
+**Title:** `feat: agent trajectory data model and Python trace/@tool`
+
+**Scope:** Go `entities.Span` / `Trajectory` (JSON tags only) + `sdk/python/connor` (`trace`, `@tool`, serialize to version-1 `run.json`) + golden fixture + tests.
+
+**Non-goals:** `inspect`, YAML expect, compare flags, replay, OTel, framework plugins.
+
+Design: [RFC 0003](docs/rfc/0003-agent-ci-tracing.md). Spans: [ADR 0003](docs/adr/0003-trace-model-not-otel.md). Artifact: [ADR 0004](docs/adr/0004-run-artifact-additive-trajectory.md).
+
+---
+
+#### First PR — detailed contract
+
+**Problem:** Connor can gate a single HTTP response, not an agent loop. We need a serializable trajectory before any new CLI command.
+
+**Public API (Python):**
+
+```python
+from connor import trace, tool
+
+@tool
+async def search_customer(customer_id: str): ...
+
+@tool
+async def refund(payment_id: str): ...
+
+with trace("test-agent") as run:
+    await search_customer("123")
+    await refund("payment-456")
+    run.write("run.json")
+```
+
+Must produce a tree `run → search_customer, refund` with stable `run_id`, parent/child span ids, `duration_ms`, `status`, original exceptions preserved.
+
+**Tests:** sync + async; nested tools; concurrent tools (sibling spans); exception re-raise; unserializable I/O; golden JSON vs Go unmarshal.
+
+---
+
 ## Planned — v1.0.0
 
-**Theme:** Full agent CI (L4)
+**Theme:** Soft evaluation + release engineering depth (not a rewrite)
 
-- [ ] Multi-step workflows, `connor replay`
-- [ ] `services/evaluation/` (Python): semantic similarity, groundedness
+- [ ] `services/evaluation/` (Python): semantic similarity, groundedness — **feeds** `run.json`, does not replace Go gates
 - [ ] Reliability score with explicit N/A dimensions
-- [ ] Prompt diff, model leaderboard
+- [ ] Prompt diff, richer driver taxonomy on compare FAIL
+- Replay of **executed** tools ships in v0.3 (narrow). v1 may add cassette/LLM replay — only if P5 proves useful.
 
 ---
 
@@ -180,12 +256,12 @@ Dates are indicative — ship when **exit criteria** below are met.
 
 | Engine | Today | Target |
 |--------|-------|--------|
-| Execution | Partial — HTTP provider, retry, timeout | Agent runner, tools |
-| Evaluation | JSON, schema, contains (Go) | + Python semantic eval |
-| Benchmark | Multi-case YAML suites | `connor compare` |
-| Quality Gates | `exit 0/1` | Latency, pass-rate, cost thresholds |
-| Observability | — | `run.json`, replay store |
-| Developer Experience | CLI, parser, docs | SDK, feature docs |
+| Execution | HTTP provider, retry, timeout | **KEEP.** Agents are not executed by Connor |
+| Evaluation | JSON, schema, contains (Go) | + trajectory gates (Go); semantic eval (Python, v1) |
+| Benchmark | YAML suites + `compare` | + tool-call / token regression |
+| Quality Gates | `exit 0/1/2` | Same contract; more optional flags |
+| Observability | `run.json` (HTTP) | + optional `trajectory` on the same file (no store) |
+| Developer Experience | CLI, YAML, handbook | + Python SDK (`trace`, `@tool`); `inspect` |
 
 Details: [docs/architecture.md](docs/architecture.md)
 
@@ -196,13 +272,13 @@ Details: [docs/architecture.md](docs/architecture.md)
 | # | Feature | Status | Release |
 |---|---------|--------|---------|
 | 1 | Regression testing | compare p95 + pass rate | v0.1 ✅ |
-| 2 | Tool call verification | — | v0.2 |
+| 2 | Tool call verification | HTTP names: v0.2; executed spans: v0.3 | v0.2 / v0.3 |
 | 3 | Reliability score | — | v1 |
-| 4 | Budget guard | Latency display only | v0.1 / v0.2 |
-| 5 | Prompt diff | — | v0.2–v1 |
-| 6 | Replay | — | v1 |
-| 7 | Multi-model benchmark | Started | v0.1 |
-| 8 | CI quality gates | `exit 0/1` OK | beta.2 ✅ |
+| 4 | Budget guard | Latency + tokens (v0.2) + tool volume (v0.3) | v0.1–v0.3 |
+| 5 | Prompt diff | — | v1 |
+| 6 | Replay | Narrow tool-stub replay | v0.3 (was v1) |
+| 7 | Multi-model benchmark | HTTP suites | v0.1 ✅ |
+| 8 | CI quality gates | `exit 0/1` | beta.2 ✅ |
 
 ---
 
@@ -212,17 +288,23 @@ Details: [docs/architecture.md](docs/architecture.md)
 |-------|-------------|---------|
 | L1 Serving | `POST /chat/completions` | beta.1 ✅ |
 | L2 Gateway | Staging OpenAI-compatible URL | beta.1 ✅ |
-| L3 Agent API | Custom endpoint + tool checks | v0.2 |
-| L4 Workflow | Multi-step, replay, semantic eval | v1 |
+| L3 Agent HTTP | Custom endpoint + **requested** `tool_calls` | v0.2 |
+| L3b Agent process | Python SDK trajectory of **executed** tools | v0.3 |
+| L4 Workflow / semantic | Soft judges, richer workflows | v1 |
+| Runtime | Policies, production enforcement | **After** v0.3 — not MVP |
 
 ---
 
-## Non-goals
+## Non-goals (MVP + current product)
 
-- Replacing Langfuse / LangSmith in production
-- Kubernetes operators / distributed runners (for now)
+- Replacing Langfuse / LangSmith in **production**
+- Becoming an agent framework, orchestrator, or MCP server
+- OpenTelemetry as the CI contract (ADR 0003)
+- New trace database (ADR 0004)
+- Kubernetes operators / distributed runners
 - MMLU and academic model leaderboards
 - Explicit `retries: 0` in YAML (beta limitation)
+- LLM-based root-cause analysis in `inspect`
 
 ---
 

@@ -2,7 +2,7 @@
 
 Living map between product phases, shipped releases, and design docs.
 
-Last updated: RFC 0002 Accepted + issue #9 (v0.2 kickoff).
+Last updated: RFC 0003 Draft (Agent CI) + ADR 0003/0004.
 
 ---
 
@@ -14,8 +14,9 @@ Last updated: RFC 0002 Accepted + issue #9 (v0.2 kickoff).
 | v0.1.0-beta.2 | ✅ Shipped | — | Output gates |
 | v0.1.0-beta.3 | ✅ Shipped | `v0.1.0-beta.3` | p95 compare |
 | **v0.1.0** | ✅ Shipped | `v0.1.0` | pass rate + handbook + demo |
-| **v0.2.0** | 🔜 In design | — | tools + cost ([#9](https://github.com/noodl-labs/Connor/issues/9)) |
-| v1.0.0 | 📋 Planned | — | workflows + Python eval |
+| **v0.2.0** | 🔜 In progress | — | HTTP tools + cost ([#9](https://github.com/noodl-labs/Connor/issues/9)) |
+| **v0.3.0** | 📋 Design | — | Agent CI tracing ([RFC 0003](rfc/0003-agent-ci-tracing.md)) |
+| v1.0.0 | 📋 Planned | — | Python semantic eval |
 
 ---
 
@@ -25,9 +26,10 @@ Last updated: RFC 0002 Accepted + issue #9 (v0.2 kickoff).
 |--------------|---------|----------|
 | V0 Foundation | beta.1 infra | ✅ |
 | V1 AI Testing | beta.1–2 `connor run` | ✅ |
-| V2 AI Regression | beta.3 + v0.1 `compare` | ✅ (hard gates); + cost in v0.2 |
+| V2 AI Regression | beta.3 + v0.1 `compare` | ✅ (hard gates); + cost in v0.2; + tool volume in v0.3 |
+| V2b CI for AI Agents | RFC 0003 v0.3 | ❌ design only |
 | V3 Release Engineering | v0.1 handbook; Action later | 🟡 |
-| V4+ Reliability / Assets / Control Plane | v1+ | ❌ |
+| V4+ Reliability / Runtime | after v0.3 | ❌ do not start in Agent CI MVP |
 
 Details: [vision.md](vision.md).
 
@@ -38,7 +40,8 @@ Details: [vision.md](vision.md).
 | RFC | Title | Status | Target | Issues | Shipped in |
 |-----|-------|--------|--------|--------|------------|
 | [0001](rfc/0001-run-artifact-and-compare.md) | Run artifact & compare | Accepted | v0.1.0 | #4 | v0.1.0-beta.3 / v0.1.0 |
-| [0002](rfc/0002-tool-and-cost-gates.md) | Tool & cost gates | Accepted | v0.2.0 | [#9](https://github.com/noodl-labs/Connor/issues/9) | — |
+| [0002](rfc/0002-tool-and-cost-gates.md) | Tool & cost gates (HTTP) | Accepted | v0.2.0 | [#9](https://github.com/noodl-labs/Connor/issues/9) | — |
+| [0003](rfc/0003-agent-ci-tracing.md) | CI for AI Agents (trajectory) | Draft | v0.3.0 | TBD | — |
 
 **When to open a new RFC:** new CLI command, new YAML field, new gate, or exit-code contract change.
 
@@ -50,6 +53,8 @@ Details: [vision.md](vision.md).
 |-----|-------|--------|-----|
 | [0001](adr/0001-comparable-runs.md) | Comparable run definition | Accepted | 0001 |
 | [0002](adr/0002-cost-regression-tokens.md) | Cost gate = token delta vs baseline | Accepted | 0002 |
+| [0003](adr/0003-trace-model-not-otel.md) | JSON spans, not OTel runtime | Accepted | 0003 |
+| [0004](adr/0004-run-artifact-additive-trajectory.md) | Trajectory additive on run.json v1 | Accepted | 0003 |
 
 **When to open a new ADR:** one irreversible decision.
 
@@ -80,6 +85,21 @@ Details: [vision.md](vision.md).
 | PR-4 agent-support.yaml + handbook | 📋 |
 | PR-5 custom agent HTTP (may slip) | 📋 |
 | Tag v0.2.0 | 📋 |
+
+---
+
+## v0.3 track (RFC 0003 Draft)
+
+| Step | Status |
+|------|--------|
+| RFC 0003 Draft | ✅ |
+| ADR 0003 / 0004 Accepted | ✅ |
+| P1 Trace primitive (Python + Go types) | 📋 first PR |
+| P2 `connor inspect` | 📋 |
+| P3 trajectory `--expect` | 📋 |
+| P4 compare tool-call regression | 📋 |
+| P5 narrow replay | 📋 |
+| Tag v0.3.0 | 📋 |
 
 ---
 

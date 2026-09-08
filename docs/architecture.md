@@ -1,10 +1,13 @@
 # ConnorLLM Architecture
 
-> **ConnorLLM** is the CI/CD reliability toolkit for AI systems.
+> **Connor** is CI for AI Agents — quality gates **before merge**, not production observability.
 
-Connor runs **before merge** — not in production observability. It executes versioned YAML suites against any OpenAI-compatible endpoint and returns `exit 0` or `exit 1` for CI.
+Two complementary surfaces share one artifact (`run.json` version 1):
 
-Your AI stack (Python agents, vLLM, gateways) stays unchanged. Connor only needs HTTP.
+1. **HTTP black-box** (shipped): Go CLI calls an OpenAI-compatible `/chat/completions`.
+2. **Agent white-box** (RFC 0003, not implemented): Python SDK records a trajectory; Go CLI inspects / gates / compares.
+
+Your agent stack stays yours. Connor instruments and evaluates.
 
 ---
 
@@ -12,18 +15,20 @@ Your AI stack (Python agents, vLLM, gateways) stays unchanged. Connor only needs
 
 | # | Engine | Role | Today | Target |
 |---|--------|------|-------|--------|
-| 1 | **Execution** | Providers, retry, timeout, suite runs | `services/runtime/` (Go) | Agent runner, tools (v0.2) |
-| 2 | **Evaluation** | JSON, schema, contains; later semantic eval | Go: syntax + schema + text | `services/evaluation/` (Python, v1) |
-| 3 | **Benchmark** | Multi-case suites, model comparison | YAML suites | `connor compare` (v0.1) |
-| 4 | **Quality Gates** | CI pass/fail, budgets | `exit 0/1`, fail reasons | Latency / pass-rate thresholds (v0.1) |
-| 5 | **Observability** | Run history, replay (CI scope) | — | `run.json` + store (v0.1 → v1) |
-| 6 | **Developer Experience** | CLI, parser, docs, GitHub Actions | `connor run`, human output | SDK, feature docs |
+| 1 | **Execution** | Providers, retry, timeout, suite runs | `services/runtime/` (Go HTTP) | **Not** an agent runner. Python SDK is out-of-process instrumentation |
+| 2 | **Evaluation** | JSON, schema, contains; later trajectory gates | Go: syntax + schema + text | Gate **list** in Go (RFC 0003); `services/evaluation/` Python semantic (v1) |
+| 3 | **Benchmark** | Multi-case suites, model comparison | YAML suites + `compare` | Tool-volume regression (v0.3) |
+| 4 | **Quality Gates** | CI pass/fail, budgets | `exit 0/1/2`, fail reasons | More optional flags; same contract |
+| 5 | **Observability** | Run artifacts (CI scope) | `run.json` v1 | Additive `trajectory` (ADR 0004). **No** collector / Langfuse |
+| 6 | **Developer Experience** | CLI, parser, docs, GitHub Actions | `run`, `compare` | `inspect`, `replay`; `sdk/python/connor` |
 
-**Shipped today:** Execution (partial) + Evaluation (deterministic gates) + DX (CLI/YAML).
+**Shipped today:** Execution (HTTP) + Evaluation (deterministic body gates) + Benchmark compare (p95, pass rate) + DX (`connor run` / `compare`).
+
+**Do not implement yet:** Python `trace`/`@tool`, `inspect`, trajectory YAML, replay (RFC 0003).
 
 ---
 
-## Data flow
+## Data flow (HTTP — shipped)
 
 ```text
 YAML suite  →  benchmark.Parse  →  application.ExecuteSuite
@@ -39,11 +44,34 @@ YAML suite  →  benchmark.Parse  →  application.ExecuteSuite
                                         ▼
                               entities.CaseResult
                                         │
-                                        ▼
-                              cli/output.PrintRun  →  exit 0 | 1
+                    ┌───────────────────┴───────────────────┐
+                    ▼                                       ▼
+          cli/output.PrintRun                    entities.BuildRunArtifact
+          exit 0 | 1                             run.json version 1
+                                                        │
+                                                        ▼
+                                              entities.CompareRuns
+                                              exit 0 | 1 | 2
 ```
 
-### Layering (DDD)
+## Data flow (agent CI — RFC 0003, planned)
+
+```text
+Python agent (LangGraph / custom / …)
+        │  sdk: trace() + @tool
+        ▼
+run.json v1 + cases[].trajectory
+        │
+        ├─ connor inspect          → tree, timing, errors (no LLM)
+        ├─ inspect --expect YAML   → trajectory gates → exit 0 | 1
+        └─ connor compare          → p95 / pass rate / tool-call delta
+```
+
+`connor run` stays HTTP-only. The SDK does **not** go through `ProviderExecutor`.
+
+---
+
+## Layering (DDD)
 
 | Layer | Path | Responsibility |
 |-------|------|----------------|
@@ -51,7 +79,7 @@ YAML suite  →  benchmark.Parse  →  application.ExecuteSuite
 | Application | `internal/runtime/application/` | Orchestrate cases, wire expectations |
 | Domain | `internal/runtime/domain/` | `Request`, `Response`, `Expectations`, gates |
 | Infrastructure | `internal/runtime/infrastructure/` | OpenAI-compatible HTTP client |
-| CLI | `internal/cli/` | `connor run`, terminal output |
+| CLI | `internal/cli/` | `connor run`, `compare`; planned `inspect`, `replay` |
 
 Domain code does not import YAML or HTTP client types.
 
@@ -75,21 +103,22 @@ Evaluation order: **contains → JSON syntax → JSON schema**.
 
 ```text
 ConnorLLM/
-├── services/runtime/           # Execution + Evaluation (Go)
-│   ├── cmd/connor/             # CLI entrypoint
+├── services/runtime/           # Go CI contract (run, compare, later inspect/replay)
+│   ├── cmd/connor/
 │   └── internal/
 │       ├── benchmark/          # YAML parser
 │       ├── cli/                # Commands + output
 │       └── runtime/
-│           ├── application/    # ExecuteSuite, EvaluateCase
+│           ├── application/    # ExecuteSuite, EvaluateCase (HTTP)
 │           ├── domain/         # Entities, validation, reliability
 │           └── infrastructure/ # openai_compatible provider
-├── benchmarks/examples/        # Runnable demo suites
-├── docs/                       # Architecture, features (growing)
+├── sdk/python/connor/          # Planned RFC 0003 — trace / @tool (not shipped)
+├── benchmarks/examples/        # Runnable demo suites + offline fixtures
+├── docs/                       # RFC, ADR, architecture, vision
 └── ROADMAP.md
 ```
 
-**Planned:** `services/evaluation/` (Python) for semantic / groundedness checks (v1).
+**Planned:** `sdk/python/connor` (instrumentation, v0.3). **Later:** `services/evaluation/` (semantic judges, v1) — different from the tracing SDK.
 
 ---
 
@@ -99,21 +128,25 @@ ConnorLLM/
 |-------|-------------|--------|
 | L1 Serving | `POST /chat/completions` | ✅ beta.1 |
 | L2 Gateway | Staging/prod OpenAI-compatible URL | ✅ config only |
-| L3 Agent API | Custom agent endpoint + tool gates | 🔜 v0.2 |
-| L4 Workflow | Multi-step, replay, semantic eval | 🔜 v1 |
+| L3 Agent HTTP | Custom agent endpoint + **requested** tool names | 🔜 v0.2 (RFC 0002) |
+| L3b Agent process | Python trajectory of **executed** tools | 🔜 v0.3 (RFC 0003) |
+| L4 Workflow | Semantic eval, richer workflows | 🔜 v1 |
 
 ---
 
 ## Non-goals
 
-- Production APM / tracing (Langfuse territory)
+- Production APM / tracing platforms (Langfuse territory). **CI** tracing of test runs is in RFC 0003.
 - Academic model benchmarks (MMLU)
-- Replacing your agent runtime language (Python, etc.)
+- Replacing your agent runtime (Python, LangGraph, …)
+- OpenTelemetry as the evaluation runtime (ADR 0003)
+- A new trace store (ADR 0004)
 
 ---
 
 ## Further reading
 
-- [ROADMAP.md](../ROADMAP.md) — releases, use-case matrix, exit criteria
+- [ROADMAP.md](../ROADMAP.md) — releases, use-case matrix, first PR
+- [RFC 0003](rfc/0003-agent-ci-tracing.md) — Agent CI design
 - [README.md](../README.md) — quick start and demo
 - Example suites: `benchmarks/examples/`
