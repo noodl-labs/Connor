@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "connor"
+version = "0.3.0.dev0"
+description = "Connor Python SDK — agent tracing for CI (RFC 0003)"
+requires-python = ">=3.10"
+readme = "README.md"
+
+[tool.setuptools.packages.find]
+include = ["connor*"]

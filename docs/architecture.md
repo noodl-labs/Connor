@@ -5,7 +5,7 @@
 Two complementary surfaces share one artifact (`run.json` version 1):
 
 1. **HTTP black-box** (shipped): Go CLI calls an OpenAI-compatible `/chat/completions`.
-2. **Agent white-box** (RFC 0003, not implemented): Python SDK records a trajectory; Go CLI inspects / gates / compares.
+2. **Agent white-box** (RFC 0003 P1–P2): Python SDK records a trajectory; `connor inspect` explains the same `run.json`.
 
 Your agent stack stays yours. Connor instruments and evaluates.
 
@@ -20,11 +20,11 @@ Your agent stack stays yours. Connor instruments and evaluates.
 | 3 | **Benchmark** | Multi-case suites, model comparison | YAML suites + `compare` | Tool-volume regression (v0.3) |
 | 4 | **Quality Gates** | CI pass/fail, budgets | `exit 0/1/2`, fail reasons | More optional flags; same contract |
 | 5 | **Observability** | Run artifacts (CI scope) | `run.json` v1 | Additive `trajectory` (ADR 0004). **No** collector / Langfuse |
-| 6 | **Developer Experience** | CLI, parser, docs, GitHub Actions | `run`, `compare` | `inspect`, `replay`; `sdk/python/connor` |
+| 6 | **Developer Experience** | CLI, parser, docs, GitHub Actions | `run`, `compare`, `inspect` | `replay`; trajectory `--expect` |
 
-**Shipped today:** Execution (HTTP) + Evaluation (deterministic body gates) + Benchmark compare (p95, pass rate) + DX (`connor run` / `compare`).
+**Shipped today:** Execution (HTTP) + Evaluation (deterministic body gates) + Benchmark compare (p95, pass rate) + DX (`connor run` / `compare` / `inspect` display-only).
 
-**Do not implement yet:** Python `trace`/`@tool`, `inspect`, trajectory YAML, replay (RFC 0003).
+**Do not implement yet:** trajectory YAML `--expect`, compare tool-volume flags, replay (RFC 0003 P3–P5).
 
 ---
 
@@ -54,7 +54,7 @@ YAML suite  →  benchmark.Parse  →  application.ExecuteSuite
                                               exit 0 | 1 | 2
 ```
 
-## Data flow (agent CI — RFC 0003, planned)
+## Data flow (agent CI — RFC 0003)
 
 ```text
 Python agent (LangGraph / custom / …)
@@ -62,8 +62,8 @@ Python agent (LangGraph / custom / …)
         ▼
 run.json v1 + cases[].trajectory
         │
-        ├─ connor inspect          → tree, timing, errors (no LLM)
-        ├─ inspect --expect YAML   → trajectory gates → exit 0 | 1
+        ├─ connor inspect          → tree, timing, errors (no LLM)   [P2]
+        ├─ inspect --expect YAML   → trajectory gates → exit 0 | 1  [P3]
         └─ connor compare          → p95 / pass rate / tool-call delta
 ```
 
@@ -79,7 +79,7 @@ run.json v1 + cases[].trajectory
 | Application | `internal/runtime/application/` | Orchestrate cases, wire expectations |
 | Domain | `internal/runtime/domain/` | `Request`, `Response`, `Expectations`, gates |
 | Infrastructure | `internal/runtime/infrastructure/` | OpenAI-compatible HTTP client |
-| CLI | `internal/cli/` | `connor run`, `compare`; planned `inspect`, `replay` |
+| CLI | `internal/cli/` | `connor run`, `compare`, `inspect`; planned `replay` |
 
 Domain code does not import YAML or HTTP client types.
 
@@ -103,7 +103,8 @@ Evaluation order: **contains → JSON syntax → JSON schema**.
 
 ```text
 ConnorLLM/
-├── services/runtime/           # Go CI contract (run, compare, later inspect/replay)
+├── services/runtime/           # Go CI contract (run, compare, inspect)
+
 │   ├── cmd/connor/
 │   └── internal/
 │       ├── benchmark/          # YAML parser
@@ -112,13 +113,13 @@ ConnorLLM/
 │           ├── application/    # ExecuteSuite, EvaluateCase (HTTP)
 │           ├── domain/         # Entities, validation, reliability
 │           └── infrastructure/ # openai_compatible provider
-├── sdk/python/connor/          # Planned RFC 0003 — trace / @tool (not shipped)
+├── sdk/python/connor/          # RFC 0003 P1 — trace / @tool (writes run.json)
 ├── benchmarks/examples/        # Runnable demo suites + offline fixtures
 ├── docs/                       # RFC, ADR, architecture, vision
 └── ROADMAP.md
 ```
 
-**Planned:** `sdk/python/connor` (instrumentation, v0.3). **Later:** `services/evaluation/` (semantic judges, v1) — different from the tracing SDK.
+**Shipped:** `sdk/python/connor` (instrumentation) + `connor inspect`. **Later:** `services/evaluation/` (semantic judges, v1) — different from the tracing SDK.
 
 ---
 

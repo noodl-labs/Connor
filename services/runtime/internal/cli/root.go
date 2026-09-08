@@ -13,6 +13,7 @@ func NewRoot() *cobra.Command {
 	}
 	root.AddCommand(newRunCmd())
 	root.AddCommand(newCompareCmd())
+	root.AddCommand(newInspectCmd())
 	return root
 }
 

@@ -35,6 +35,24 @@ jobs:
         run: |
           ./connor --help
           ./connor run --help
+          ./connor inspect --help
+          ./connor inspect ../../benchmarks/examples/agent-trace-demo/run.json
+
+  python-sdk:
+    name: Python SDK
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sdk/python
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Unit tests
+        run: PYTHONPATH=. python -m unittest discover -s tests -v
 
   lint:
     name: Lint

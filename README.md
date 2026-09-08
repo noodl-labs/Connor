@@ -9,7 +9,7 @@ Next: did the agent call `refund` twice, blow the latency budget, or explode too
 connor run suite.yaml   # exit 0 = safe to merge · exit 1 = block the PR
 ```
 
-Your agent stays Python (or any stack). Connor today only needs an **OpenAI-compatible HTTP endpoint** (`/v1/chat/completions`). A Python `trace()` / `@tool` SDK is [designed, not shipped](docs/rfc/0003-agent-ci-tracing.md).
+Your agent stays Python (or any stack). HTTP smoke tests need an **OpenAI-compatible endpoint** (`/v1/chat/completions`). Agent tracing is opt-in: Python `trace()` / `@tool` writes `run.json`; `connor inspect` explains it.
 
 **Not** a production observability platform (Langfuse, LangSmith). **Not** an agent framework. Connor runs **in CI** — like unit tests for your LLM / agent layer.
 
@@ -34,6 +34,7 @@ Connor answers: **block the merge before users see it.**
 | **Smoke gate** | `connor run suite.yaml` | Does every case pass right now? |
 | **Run artifact** | `connor run suite.yaml --out run.json` | What were latencies and pass rate? |
 | **Regression** | `connor compare baseline.json candidate.json` | Did p95 get worse vs baseline? |
+| **Inspect** | `connor inspect run.json` | What did the agent actually do? (display only) |
 
 **Gates today:** HTTP 2xx · JSON syntax · JSON Schema · text contains · p95 regression (compare).
 
@@ -269,13 +270,14 @@ Details: [docs/architecture.md](docs/architecture.md) · [Roadmap](ROADMAP.md) �
 - `connor run` — YAML suites, JSON / schema / contains gates
 - `connor run --out run.json` — run artifact
 - `connor compare` — p95 + pass-rate gates, themed output
+- `connor inspect` — trajectory tree from `run.json` (unreleased; RFC 0003 P2)
 
 **Docs:** [Vision](docs/vision.md) · [Traceability](docs/traceability.md) · [CI handbook](docs/handbook/ci-regression.md)
 
 **Next:**
 
 - `v0.2.0` — HTTP tool names + cost — [RFC 0002](docs/rfc/0002-tool-and-cost-gates.md)
-- `v0.3.0` — Agent tracing / inspect / trajectory gates — [RFC 0003](docs/rfc/0003-agent-ci-tracing.md) (Draft; first PR = data model + Python SDK only)
+- `v0.3.0` — Agent tracing / inspect / trajectory gates — [RFC 0003](docs/rfc/0003-agent-ci-tracing.md) (Draft; P1 trace + P2 inspect in progress)
 
 ---
 

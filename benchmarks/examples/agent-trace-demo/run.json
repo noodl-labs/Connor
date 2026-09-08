@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "suite_id": "test-agent",
+  "target": "local",
+  "cases": [
+    {
+      "id": "test-agent",
+      "model": "test-agent",
+      "passed": true,
+      "reason": "",
+      "latency_ms": 40,
+      "attempts": 1,
+      "trajectory": {
+        "run_id": "run_a1b2c3d4e5f60718",
+        "spans": [
+          {
+            "trace_id": "00112233445566778899aabbccddeeff",
+            "run_id": "run_a1b2c3d4e5f60718",
+            "span_id": "0123456789abcdef",
+            "parent_span_id": "",
+            "name": "test-agent",
+            "kind": "run",
+            "status": "ok",
+            "started_at": "2026-09-08T19:00:00.000Z",
+            "ended_at": "2026-09-08T19:00:00.040Z",
+            "duration_ms": 40
+          },
+          {
+            "trace_id": "00112233445566778899aabbccddeeff",
+            "run_id": "run_a1b2c3d4e5f60718",
+            "span_id": "1111111111111111",
+            "parent_span_id": "0123456789abcdef",
+            "name": "search_customer",
+            "kind": "tool",
+            "status": "ok",
+            "started_at": "2026-09-08T19:00:00.005Z",
+            "ended_at": "2026-09-08T19:00:00.015Z",
+            "duration_ms": 10,
+            "input": {"customer_id": "123"},
+            "output": {"name": "Ada"}
+          },
+          {
+            "trace_id": "00112233445566778899aabbccddeeff",
+            "run_id": "run_a1b2c3d4e5f60718",
+            "span_id": "2222222222222222",
+            "parent_span_id": "0123456789abcdef",
+            "name": "refund",
+            "kind": "tool",
+            "status": "ok",
+            "started_at": "2026-09-08T19:00:00.020Z",
+            "ended_at": "2026-09-08T19:00:00.035Z",
+            "duration_ms": 15,
+            "input": {"payment_id": "payment-456"},
+            "output": {"ok": true}
+          }
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "total": 1,
+    "passed": 1,
+    "failed": 0,
+    "pass_rate": 100,
+    "p50_ms": 40,
+    "p95_ms": 40
+  }
+}
