@@ -586,7 +586,7 @@ RFC 0002 PRs (expect_tool, cost) continue in **parallel** on the HTTP path. Do n
 
 - [ ] `@tool` + `trace()` produce a version-1 `run.json` with correlated spans (sync + async)
 - [ ] Exceptions propagate; span `status=error`
-- [ ] `connor inspect run.json` prints trajectory from the artifact
+- [x] `connor inspect run.json` prints trajectory from the artifact
 - [ ] `inspect --expect` fails CI on `max_calls` / `forbidden_tools` / `success`
 - [ ] `compare --max-tool-calls-regression` AND-composes with existing gates
 - [ ] Replay docs state guarantees / non-guarantees; HTTP-only artifact → exit 2

@@ -70,7 +70,7 @@ v0.3 is **phased** (RFC 0003). First PR is data model + Python `trace`/`@tool` o
 | 18 | Custom agent HTTP | Non-`/chat/completions` URL? | 📋 v0.2 | Agent provider (may slip) |
 | | **Agent CI (executed trajectory)** | | | |
 | 26 | Trace primitive | Record tool/LLM spans in CI? | 📋 v0.3 P1 | Python `trace` / `@tool` |
-| 27 | Inspect | Explain a run without an LLM? | 📋 v0.3 P2 | `connor inspect` |
+| 27 | Inspect | Explain a run without an LLM? | ✅ v0.3 P2 | `connor inspect` |
 | 28 | Trajectory assertions | `refund` at most once? | 📋 v0.3 P3 | `inspect --expect` |
 | 29 | Tool-volume regression | Calls/run exploded vs main? | 📋 v0.3 P4 | `compare --max-tool-calls-regression` |
 | 20 | Replay (narrow) | Re-run with recorded tool outputs? | 📋 v0.3 P5 | `connor replay` — not prod time-travel |
@@ -187,15 +187,15 @@ Does **not** replace v0.2 HTTP `tool_calls`. Complementary surface: Python SDK w
 
 | Phase | User-visible | First-PR sized? |
 |-------|----------------|-----------------|
-| **P1** | `with trace():` + `@tool` → `run.json` trajectory | **Yes — start here** |
-| **P2** | `connor inspect run.json` | After P1 |
+| **P1** | `with trace():` + `@tool` → `run.json` trajectory | ✅ |
+| **P2** | `connor inspect run.json` | ✅ display-only |
 | **P3** | `inspect --expect` trajectory gates | After P2 |
 | **P4** | `compare --max-tool-calls-regression` | After P1 (needs summary counters) |
 | **P5** | `connor replay` (tool stubs only) | After P1 + P4 |
 
 ### Exit criteria for v0.3.0
 - [ ] Sync + async `@tool` spans correlated; exceptions re-raised
-- [ ] `connor inspect` renders trajectory from `run.json` (no LLM)
+- [x] `connor inspect` renders trajectory from `run.json` (no LLM)
 - [ ] Forbidden / max tool-call gates fail `connor` with stable reasons
 - [ ] Compare AND-composes tool-call regression with p95 / pass-rate
 - [ ] Replay guarantees documented; HTTP-only artifact → exit 2

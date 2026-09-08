@@ -5,6 +5,7 @@
 ### Added
 - Python SDK `trace()` / `@tool` writes additive `cases[].trajectory` on `run.json` version 1 (RFC 0003 P1)
 - Domain types `Trajectory` / `Span`; fail reason `agent_failed` (gates not wired yet)
+- `connor inspect run.json` — deterministic trajectory tree (RFC 0003 P2); HTTP-only artifacts print the case table + a note; exit 0 valid / 2 invalid JSON (never 1 without `--expect`)
 
 ### Docs
 - RFC 0003 Draft: CI for AI Agents (tracing, inspect, trajectory gates, replay)

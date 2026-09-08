@@ -35,6 +35,8 @@ jobs:
         run: |
           ./connor --help
           ./connor run --help
+          ./connor inspect --help
+          ./connor inspect ../../benchmarks/examples/agent-trace-demo/run.json
 
   python-sdk:
     name: Python SDK

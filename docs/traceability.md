@@ -94,8 +94,8 @@ Details: [vision.md](vision.md).
 |------|--------|
 | RFC 0003 Draft | ✅ |
 | ADR 0003 / 0004 Accepted | ✅ |
-| P1 Trace primitive (Python + Go types) | 📋 first PR |
-| P2 `connor inspect` | 📋 |
+| P1 Trace primitive (Python + Go types) | ✅ on `feat/CON08-TRACE-PRIMITIVE` |
+| P2 `connor inspect` | ✅ display-only |
 | P3 trajectory `--expect` | 📋 |
 | P4 compare tool-call regression | 📋 |
 | P5 narrow replay | 📋 |

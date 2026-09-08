@@ -12,6 +12,7 @@ type Theme struct {
 	enabled bool
 	pass    lipgloss.Style
 	fail    lipgloss.Style
+	warn    lipgloss.Style
 	dim     lipgloss.Style
 	label   lipgloss.Style
 	bold    lipgloss.Style
@@ -23,6 +24,7 @@ func NewTheme(w io.Writer) Theme {
 		enabled: enabled,
 		pass:    lipgloss.NewStyle().Foreground(lipgloss.Color("2")).Bold(true), // vert
 		fail:    lipgloss.NewStyle().Foreground(lipgloss.Color("1")).Bold(true), // rouge
+		warn:    lipgloss.NewStyle().Foreground(lipgloss.Color("3")).Bold(true), // jaune
 		dim:     lipgloss.NewStyle().Foreground(lipgloss.Color("8")),            // gris
 		label:   lipgloss.NewStyle().Foreground(lipgloss.Color("6")),            // bleu labels
 		bold:    lipgloss.NewStyle().Bold(true),

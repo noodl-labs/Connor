@@ -1,8 +1,12 @@
-# Agent trace demo (RFC 0003 P1)
+# Agent trace demo (RFC 0003)
 
 Offline fixture showing the **additive** `cases[].trajectory` field on `run.json` version 1.
 
-No API call required. `connor inspect` is not shipped yet — this is the contract the Python SDK writes.
+No API call required.
+
+```bash
+connor inspect benchmarks/examples/agent-trace-demo/run.json
+```
 
 ## Shape
 
@@ -19,8 +23,8 @@ cat benchmarks/examples/agent-trace-demo/run.json | jq '.cases[0].trajectory.spa
 ## Verify
 
 ```bash
-cd services/runtime
-go test ./internal/runtime/domain/entities/ -run Trajectory -v
+make demo-inspect
+cd services/runtime && go test ./internal/runtime/domain/entities/ -run Trajectory -v
 ```
 
-tmp/ is gitignored. Demo output is a real `run.json` Connor will later `inspect`.
+tmp/ is gitignored. `make demo-trace` / `demo-trace-complex` write live artifacts you can inspect the same way.
