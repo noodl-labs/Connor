@@ -5,9 +5,10 @@ Short, **immutable decisions** — not full designs (those live in RFCs).
 ## When to write an ADR
 
 - Comparable runs rules (0001)
-- "Pass rate is absolute on candidate, not delta" (could be ADR 0002)
-- Schema versioning policy for `run.json`
-- Go vs Python boundary for evaluators
+- Cost gate = token delta (0002)
+- Trace model vs OpenTelemetry (0003)
+- `run.json` stays version 1 with additive trajectory (0004)
+- Go vs Python: Go = CI contract; Python SDK = instrumentation (RFC 0003); Python eval service remains v1 semantic judges
 
 Skip ADR for: implementation details covered entirely by RFC.
 
